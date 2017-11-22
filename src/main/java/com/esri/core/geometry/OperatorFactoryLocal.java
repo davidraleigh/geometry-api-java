@@ -128,7 +128,7 @@ public class OperatorFactoryLocal extends OperatorFactory {
 		st_supportedOperators.put(Type.Boundary, new OperatorBoundaryLocal());
 
 		// LabelPoint, - not ported
-		// comment line for post_generate.py
+		// comment line for post_generate.py // temp trigger
 
 	}
 
