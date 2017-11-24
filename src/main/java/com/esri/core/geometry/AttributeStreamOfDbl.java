@@ -31,14 +31,14 @@ import java.util.Arrays;
 
 final class AttributeStreamOfDbl extends AttributeStreamBase {
 
-	double[] m_buffer = null;
-	int m_size;
+	private double[] m_buffer = null;
+	private int m_size;
 
 	public int size() {
 		return m_size;
 	}
 
-	public void reserve(int reserve)// only in Java
+	public void reserve(int reserve)
 	{
 		if (reserve <= 0)
 			return;
@@ -52,6 +52,10 @@ final class AttributeStreamOfDbl extends AttributeStreamBase {
 			m_buffer = buf;
 		}
 
+	}
+
+	public int capacity() {
+		return m_buffer != null ? m_buffer.length : 0;
 	}
 
 	public AttributeStreamOfDbl(int size) {
@@ -579,8 +583,8 @@ final class AttributeStreamOfDbl extends AttributeStreamBase {
 			throw new GeometryException("invalid_call");
 
 		if (validSize - (index + count) > 0) {
-			System.arraycopy(m_buffer, index + count, m_buffer, index, validSize
-							- (index + count));
+			System.arraycopy(m_buffer, index + count, m_buffer, index,
+					validSize - (index + count));
 		}
 		m_size -= count;
 	}

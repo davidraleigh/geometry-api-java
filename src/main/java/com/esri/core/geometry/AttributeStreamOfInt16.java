@@ -30,8 +30,8 @@ import java.nio.ByteBuffer;
 
 final class AttributeStreamOfInt16 extends AttributeStreamBase {
 
-	short[] m_buffer = null;
-	int m_size;
+	private short[] m_buffer = null;
+	private int m_size;
 
 	public int size() {
 		return m_size;
@@ -51,6 +51,10 @@ final class AttributeStreamOfInt16 extends AttributeStreamBase {
 			m_buffer = buf;
 		}
 
+	}
+
+	public int capacity() {
+		return m_buffer != null ? m_buffer.length : 0;
 	}
 
 	public AttributeStreamOfInt16(int size) {
@@ -299,7 +303,7 @@ final class AttributeStreamOfInt16 extends AttributeStreamBase {
 		resize(newSize);
 
 		if (bForward) {
-			System.arraycopy(((AttributeStreamOfDbl) src).m_buffer, start,
+			System.arraycopy(((AttributeStreamOfInt16) src).m_buffer, start,
 					m_buffer, oldSize, count);
 		} else {
 			int n = count;

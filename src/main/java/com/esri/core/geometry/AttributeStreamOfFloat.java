@@ -30,8 +30,8 @@ import java.nio.ByteBuffer;
 
 final class AttributeStreamOfFloat extends AttributeStreamBase {
 
-	float[] m_buffer = null;
-	int m_size;
+	private float[] m_buffer = null;
+	private int m_size;
 
 	public int size() {
 		return m_size;
@@ -51,6 +51,10 @@ final class AttributeStreamOfFloat extends AttributeStreamBase {
 			m_buffer = buf;
 		}
 
+	}
+
+	public int capacity() {
+		return m_buffer != null ? m_buffer.length : 0;
 	}
 
 	public AttributeStreamOfFloat(int size) {
@@ -314,7 +318,7 @@ final class AttributeStreamOfFloat extends AttributeStreamBase {
 		resize(newSize);
 
 		if (bForward) {
-			System.arraycopy(((AttributeStreamOfDbl) src).m_buffer, start,
+			System.arraycopy(((AttributeStreamOfFloat) src).m_buffer, start,
 					m_buffer, oldSize, count);
 		} else {
 			int n = count;
