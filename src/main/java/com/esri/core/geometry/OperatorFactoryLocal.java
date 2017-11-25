@@ -1,5 +1,5 @@
 /*
- Copyright 1995-2015 Esri
+ Copyright 1995-2017 Esri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@
 package com.esri.core.geometry;
 
 import com.esri.core.geometry.Operator.Type;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
@@ -35,8 +37,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParser;
 
 /**
  *An abstract class that represent the basic OperatorFactory interface.
@@ -53,8 +53,6 @@ public class OperatorFactoryLocal extends OperatorFactory {
 		st_supportedOperators.put(Type.ExportToJson,
 				new OperatorExportToJsonLocal());
 		st_supportedOperators.put(Type.ImportFromJson,
-				new OperatorImportFromJsonLocal());
-		st_supportedOperators.put(Type.ImportMapGeometryFromJson,
 				new OperatorImportFromJsonLocal());
 		st_supportedOperators.put(Type.ExportToESRIShape,
 				new OperatorExportToESRIShapeLocal());
@@ -199,17 +197,24 @@ public class OperatorFactoryLocal extends OperatorFactory {
 		} catch (Exception ex) {
 		}
 
-		JsonFactory jf = new JsonFactory();
-		JsonParser jp = null;
-		try {
-			jp = jf.createJsonParser(jsonString);
-			jp.nextToken();
-		} catch (Exception ex) {
-		}
-		MapGeometry mapGeom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, jp);
+		MapGeometry mapGeom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, jsonString);
 		return mapGeom;
 	}
 
+	public static MapGeometry loadGeometryFromJSONStringDbg(String json) {
+		if (json == null) {
+			throw new IllegalArgumentException();
+		}
+
+		MapGeometry mapGeom = null;
+		try {
+			mapGeom = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, json);
+		} catch (Exception e) {
+			throw new IllegalArgumentException(e.toString());
+		}
+		return mapGeom;
+	}
+	
 	public static Geometry loadGeometryFromEsriShapeDbg(String file_name) {
 		if (file_name == null) {
 			throw new IllegalArgumentException();

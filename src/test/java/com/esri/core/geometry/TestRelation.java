@@ -1,4 +1,30 @@
+/*
+ Copyright 1995-2017 Esri
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ For additional information, contact:
+ Environmental Systems Research Institute, Inc.
+ Attn: Contracts Dept
+ 380 New York Street
+ Redlands, California, USA 92373
+
+ email: contracts@esri.com
+ */
+
 package com.esri.core.geometry;
+
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
@@ -5481,7 +5507,7 @@ public class TestRelation extends TestCase {
 				null);
 		assertTrue(answer2);
 	}
-
+	
 	@Test
 	public void testDisjointCrash() {
 		Polygon g1 = new Polygon();
@@ -5492,5 +5518,14 @@ public class TestRelation extends TestCase {
 		OperatorDisjoint.local().accelerateGeometry(g1, SpatialReference.create(4267), GeometryAccelerationDegree.enumHot);
 		boolean res = OperatorDisjoint.local().execute(g1, g2, SpatialReference.create(4267), null);
 		assertTrue(!res);
-	}	
+	}
+	
+	@Test
+	public void testDisjointFail() {
+		MapGeometry geometry1 = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, "{\"paths\":[[[3,3],[3,3]]],\"spatialReference\":{\"wkid\":4326}}");
+		MapGeometry geometry2 = OperatorImportFromJson.local().execute(Geometry.Type.Unknown, "{\"rings\":[[[2,2],[2,4],[4,4],[4,2],[2,2]]],\"spatialReference\":{\"wkid\":4326}}");
+		OperatorDisjoint.local().accelerateGeometry(geometry1.getGeometry(), geometry1.getSpatialReference(), GeometryAccelerationDegree.enumMedium);
+		boolean res = OperatorDisjoint.local().execute(geometry1.getGeometry(), geometry2.getGeometry(), geometry1.getSpatialReference(), null);
+		assertTrue(!res);
+	}
 }

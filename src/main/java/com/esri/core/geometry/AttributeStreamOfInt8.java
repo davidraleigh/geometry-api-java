@@ -1,5 +1,5 @@
 /*
- Copyright 1995-2015 Esri
+ Copyright 1995-2017 Esri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ final class AttributeStreamOfInt8 extends AttributeStreamBase {
 	public int capacity() {
 		return m_buffer != null ? m_buffer.length : 0;
 	}
-
+	
 	public AttributeStreamOfInt8(int size) {
 		int sz = size;
 		if (sz < 2)
