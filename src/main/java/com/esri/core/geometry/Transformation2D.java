@@ -458,9 +458,9 @@ public final class Transformation2D {
 	 *            The tolerance value.
 	 */
 	public boolean isIdentity(double tol) {
-		Point2D pt = Point2D.construct(0., 1.);
+		Point2D pt = Point2D.construct(0.0, 1.0);
 		transform(pt, pt);
-		pt.sub(Point2D.construct(0., 1.));
+		pt.sub(Point2D.construct(0.0, 1.0));
 		if (pt.sqrLength() > tol * tol)
 			return false;
 
