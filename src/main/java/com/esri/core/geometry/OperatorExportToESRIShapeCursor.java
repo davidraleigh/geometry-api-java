@@ -45,8 +45,23 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	@Override
-	public long getByteBufferID() {
+	public int getByteBufferID() {
 		return m_geometryCursor.getGeometryID();
+	}
+
+	@Override
+	public ByteBuffer next() {
+		Geometry geometry;
+		if (hasNext()) {
+			geometry = m_geometryCursor.next();
+			simpleStateEnum = geometry.getSimpleState();
+			int size = exportToESRIShape(m_exportFlags, geometry, null);
+			if (m_shapeBuffer == null || size > m_shapeBuffer.capacity())
+				m_shapeBuffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
+			exportToESRIShape(m_exportFlags, geometry, m_shapeBuffer);
+			return m_shapeBuffer;
+		}
+		return null;
 	}
 
 	@Override
@@ -62,22 +77,6 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	@Override
 	public boolean hasNext() {
 		return m_geometryCursor != null && m_geometryCursor.hasNext();
-	}
-
-	@Override
-	public ByteBuffer next() {
-		Geometry geometry;
-		if (hasNext()) {
-			geometry = m_geometryCursor.next();
-			simpleStateEnum = geometry.getSimpleState();
-			int size = exportToESRIShape(m_exportFlags, geometry, null);
-			if (m_shapeBuffer == null || size > m_shapeBuffer.capacity())
-				m_shapeBuffer = ByteBuffer.allocate(size).order(
-						ByteOrder.LITTLE_ENDIAN);
-			exportToESRIShape(m_exportFlags, geometry, m_shapeBuffer);
-			return m_shapeBuffer;
-		}
-		return null;
 	}
 
 	static int exportToESRIShape(int exportFlags, Geometry geometry,

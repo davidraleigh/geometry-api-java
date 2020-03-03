@@ -32,7 +32,7 @@ public class OperatorExportToWktCursor extends StringCursor {
 	}
 
 	@Override
-	public long getID() {
+	public int getID() {
 		return m_geometryCursor.getGeometryID();
 	}
 

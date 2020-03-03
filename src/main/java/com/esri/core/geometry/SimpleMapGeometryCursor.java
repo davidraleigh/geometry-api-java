@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 class SimpleMapGeometryCursor extends MapGeometryCursor {
 	private ArrayDeque<MapGeometry> m_geomDeque;
-	private long m_index = -1;
+	private int m_index = -1;
 	private String m_currentFeatureID = "";
 	private SimpleStateEnum m_simpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 

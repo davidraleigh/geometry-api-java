@@ -32,7 +32,7 @@ public class OperatorImportFromJsonCursor extends MapGeometryCursor {
 
 	int m_type;
 
-	long m_index;
+	int m_index;
 
 	public OperatorImportFromJsonCursor(int type, JsonReaderCursor jsonParsers) {
 		m_index = -1;
@@ -49,8 +49,13 @@ public class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	}
 
 	@Override
-	public SimpleStateEnum getSimpleState() {
-		return m_inputJsonParsers.getSimpleState();
+	public MapGeometry next() {
+		JsonReader jsonParser;
+		if ((jsonParser = m_inputJsonParsers.next()) != null) {
+			m_index = m_inputJsonParsers.getID();
+			return importFromJsonParser(m_type, jsonParser);
+		}
+		return null;
 	}
 
 	@Override
@@ -59,18 +64,13 @@ public class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	}
 
 	@Override
-	public boolean hasNext() {
-		return m_inputJsonParsers.hasNext();
+	public SimpleStateEnum getSimpleState() {
+		return m_inputJsonParsers.getSimpleState();
 	}
 
 	@Override
-	public MapGeometry next() {
-		JsonReader jsonParser;
-		if ((jsonParser = m_inputJsonParsers.next()) != null) {
-			m_index = m_inputJsonParsers.getID();
-			return importFromJsonParser(m_type, jsonParser);
-		}
-		return null;
+	public boolean hasNext() {
+		return m_inputJsonParsers.hasNext();
 	}
 
 	static MapGeometry importFromJsonParser(int gt, JsonReader parser) {

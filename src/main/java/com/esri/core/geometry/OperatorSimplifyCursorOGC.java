@@ -31,11 +31,11 @@ class OperatorSimplifyCursorOGC extends GeometryCursor {
 	OperatorSimplifyCursorOGC(GeometryCursor geoms,
 	                          SpatialReference spatialRef, boolean bForceSimplify,
 	                          ProgressTracker progressTracker) {
-		if (geoms == null)
-			throw new IllegalArgumentException();
-
 		m_progressTracker = progressTracker;
 		m_bForceSimplify = bForceSimplify;
+
+		if (geoms == null)
+			throw new IllegalArgumentException();
 
 		m_inputGeoms = geoms;
 
