@@ -30,7 +30,7 @@ public class OperatorImportFromWkbCursor extends GeometryCursor {
 	}
 
 	@Override
-	public long getGeometryID() {
+	public int getGeometryID() {
 		return m_inputWkbBuffers.getByteBufferID();
 	}
 
