@@ -70,7 +70,7 @@ public class OperatorImportFromESRIShapeCursor extends GeometryCursor {
 	}
 
 	@Override
-	public long getGeometryID() {
+	public int getGeometryID() {
 		return m_inputShapeBuffers.getByteBufferID();
 	}
 
