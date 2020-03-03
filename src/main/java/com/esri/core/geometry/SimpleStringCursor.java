@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 public class SimpleStringCursor extends StringCursor {
 	private ArrayDeque<String> m_arrayDeque;
 	private ArrayDeque<SimpleStateEnum> m_simpleStates;
-	private ArrayDeque<Long> m_ids;
+	private ArrayDeque<Integer> m_ids;
 	private ArrayDeque<String> m_featureIDs;
 	private String m_currentFeatureID = "";
-	private long m_current_id = -1L;
+	private int m_current_id = -1;
 	private SimpleStateEnum m_current_state = SimpleStateEnum.SIMPLE_UNKNOWN;
 
 	@Deprecated
@@ -21,14 +21,14 @@ public class SimpleStringCursor extends StringCursor {
 		m_arrayDeque.push(inputString);
 	}
 
-	public SimpleStringCursor(String inputString, long id) {
+	public SimpleStringCursor(String inputString, int id) {
 		m_arrayDeque = new ArrayDeque<>(1);
 		m_arrayDeque.push(inputString);
 		m_ids = new ArrayDeque<>(1);
 		m_ids.push(id);
 	}
 
-	public SimpleStringCursor(String inputString, long id, SimpleStateEnum simpleState) {
+	public SimpleStringCursor(String inputString, int id, SimpleStateEnum simpleState) {
 		m_arrayDeque = new ArrayDeque<>(1);
 		m_arrayDeque.push(inputString);
 		m_ids = new ArrayDeque<>(1);
@@ -37,7 +37,7 @@ public class SimpleStringCursor extends StringCursor {
 		m_simpleStates.push(simpleState);
 	}
 
-	public SimpleStringCursor(String inputString, long id, SimpleStateEnum simpleState, String featureID) {
+	public SimpleStringCursor(String inputString, int id, SimpleStateEnum simpleState, String featureID) {
 		m_arrayDeque = new ArrayDeque<>(1);
 		m_arrayDeque.push(inputString);
 		m_ids = new ArrayDeque<>(1);
@@ -58,19 +58,19 @@ public class SimpleStringCursor extends StringCursor {
 		m_arrayDeque = new ArrayDeque<>(inputStringArray);
 	}
 
-	public SimpleStringCursor(ArrayDeque<String> arrayDeque, ArrayDeque<Long> ids) {
+	public SimpleStringCursor(ArrayDeque<String> arrayDeque, ArrayDeque<Integer> ids) {
 		m_ids = ids;
 		m_arrayDeque = arrayDeque;
 	}
 
-	public SimpleStringCursor(ArrayDeque<String> arrayDeque, ArrayDeque<Long> ids, ArrayDeque<SimpleStateEnum> simpleStates) {
+	public SimpleStringCursor(ArrayDeque<String> arrayDeque, ArrayDeque<Integer> ids, ArrayDeque<SimpleStateEnum> simpleStates) {
 		m_ids = ids;
 		m_arrayDeque = arrayDeque;
 		m_simpleStates = simpleStates;
 	}
 
 	public SimpleStringCursor(ArrayDeque<String> arrayDeque,
-	                          ArrayDeque<Long> ids,
+	                          ArrayDeque<Integer> ids,
 	                          ArrayDeque<SimpleStateEnum> simpleStates,
 	                          ArrayDeque<String> featureIDs) {
 		if ((arrayDeque.size() & ids.size() & simpleStates.size() & featureIDs.size()) != arrayDeque.size()) {
@@ -83,7 +83,7 @@ public class SimpleStringCursor extends StringCursor {
 	}
 
 	@Override
-	public long getID() {
+	public int getID() {
 		return m_current_id;
 	}
 
