@@ -23,42 +23,57 @@
  */
 package com.esri.core.geometry;
 
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * A simple MapGeometryCursor implementation that wraps a single MapGeometry or
  * an array of MapGeometry classes
  */
 class SimpleMapGeometryCursor extends MapGeometryCursor {
+    private ArrayDeque<MapGeometry> m_geomDeque;
+    private long m_index = -1;
+    private String m_currentFeatureID = "";
+    private SimpleStateEnum m_simpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 
-	MapGeometry m_geom;
-	MapGeometry[] m_geomArray;
 
-	int m_index;
-	int m_count;
+    public SimpleMapGeometryCursor(MapGeometry geom) {
+        m_geomDeque = new ArrayDeque<>(1);
+    }
 
-	public SimpleMapGeometryCursor(MapGeometry geom) {
-		m_geom = geom;
-		m_index = -1;
-		m_count = 1;
-	}
+    public SimpleMapGeometryCursor(MapGeometry[] geoms) {
+        m_geomDeque = Arrays.stream(geoms).collect(Collectors.toCollection(ArrayDeque::new));
+    }
 
-	public SimpleMapGeometryCursor(MapGeometry[] geoms) {
-		m_geomArray = geoms;
-		m_index = -1;
-		m_count = geoms.length;
-	}
+    @Override
+    public long getGeometryID() {
+        return m_index;
+    }
 
-	@Override
-	public int getGeometryID() {
-		return m_index;
-	}
+    @Override
+    public SimpleStateEnum getSimpleState() {
+        return m_simpleState;
+    }
 
-	@Override
-	public MapGeometry next() {
-		if (m_index < m_count - 1) {
-			m_index++;
-			return m_geom != null ? m_geom : m_geomArray[m_index];
-		}
+    @Override
+    public String getFeatureID() { return m_currentFeatureID; }
 
-		return null;
-	}
+
+    @Override
+    public boolean hasNext() {
+        return m_geomDeque.size() > 0;
+    }
+
+    @Override
+    public MapGeometry next() {
+        if (hasNext()) {
+            m_index++;
+            MapGeometry mapGeometry = m_geomDeque.pop();
+            m_simpleState = mapGeometry.m_geometry.getSimpleState();
+            return mapGeometry;
+        }
+
+        return null;
+    }
 }

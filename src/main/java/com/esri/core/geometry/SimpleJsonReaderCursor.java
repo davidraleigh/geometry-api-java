@@ -23,40 +23,51 @@
  */
 package com.esri.core.geometry;
 
-class SimpleJsonReaderCursor extends JsonReaderCursor {
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
-	JsonReader m_jsonParser;
-	JsonReader[] m_jsonParserArray;
+public class SimpleJsonReaderCursor extends JsonReaderCursor {
+    private ArrayDeque<JsonReader> m_jsonDeque;
+    private int m_index= -1;
+    private String currentFeatureID = "";
+    private SimpleStateEnum simpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 
-	int m_index;
-	int m_count;
+    public SimpleJsonReaderCursor(JsonReader jsonString) {
+        m_jsonDeque = new ArrayDeque<>(1);
+        m_jsonDeque.add(jsonString);
+    }
 
-	public SimpleJsonReaderCursor(JsonReader jsonString) {
-		m_jsonParser = jsonString;
-		m_index = -1;
-		m_count = 1;
-	}
+    public SimpleJsonReaderCursor(JsonReader[] jsonStringArray) {
+        m_jsonDeque = Arrays.stream(jsonStringArray).collect(Collectors.toCollection(ArrayDeque::new));
+    }
 
-	public SimpleJsonReaderCursor(JsonReader[] jsonStringArray) {
-		m_jsonParserArray = jsonStringArray;
-		m_index = -1;
-		m_count = jsonStringArray.length;
-	}
+    @Override
+    public int getID() {
+        return m_index;
+    }
 
-	@Override
-	public int getID() {
-		return m_index;
-	}
+    @Override
+    public SimpleStateEnum getSimpleState() {
+        return simpleState;
+    }
 
-	@Override
-	public JsonReader next() {
-		if (m_index < m_count - 1) {
-			m_index++;
-			return m_jsonParser != null ? m_jsonParser
-					: m_jsonParserArray[m_index];
-		}
+    @Override
+    public String getFeatureID() { return currentFeatureID ; }
 
-		return null;
-	}
+    @Override
+    public boolean hasNext() {
+        return m_jsonDeque.size() > 0;
+    }
+
+    @Override
+    public JsonReader next() {
+        if (!m_jsonDeque.isEmpty()) {
+            m_index++;
+            return m_jsonDeque.pop();
+        }
+
+        return null;
+    }
 
 }

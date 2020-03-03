@@ -25,32 +25,122 @@
 package com.esri.core.geometry;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-class SimpleByteBufferCursor extends ByteBufferCursor {
+public class SimpleByteBufferCursor extends ByteBufferCursor {
+    private ArrayDeque<Long> m_ids;
+    private ArrayDeque<ByteBuffer> m_byteBufferDeque;
+    private ArrayDeque<SimpleStateEnum> m_simpleStates;
+    private ArrayDeque<String> m_featureIDs;
+    private long m_current_id = -1;
+    private SimpleStateEnum m_currentSimpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
+    private String m_currentFeatureID = "";
 
-	ByteBuffer m_byteBuffer;
-	int m_index;
-	int m_count;
+    @Deprecated
+    public SimpleByteBufferCursor(ByteBuffer byteBuffer) {
+        m_byteBufferDeque = new ArrayDeque<>();
+        m_byteBufferDeque.add(byteBuffer);
+    }
 
-	public SimpleByteBufferCursor(ByteBuffer byteBuffer) {
-		m_byteBuffer = byteBuffer;
-		m_index = -1;
-		m_count = 1;
-	}
+    public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id) {
+        m_byteBufferDeque = new ArrayDeque<>(1);
+        m_byteBufferDeque.add(byteBuffer);
+        m_ids = new ArrayDeque<>(1);
+        m_ids.push(id);
+    }
 
-	@Override
-	public int getByteBufferID() {
-		return m_index;
-	}
+    public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id, SimpleStateEnum simpleState) {
+        m_byteBufferDeque = new ArrayDeque<>(1);
+        m_byteBufferDeque.add(byteBuffer);
+        m_ids = new ArrayDeque<>(1);
+        m_ids.push(id);
+        m_simpleStates = new ArrayDeque<>(1);
+        m_simpleStates.push(simpleState);
+    }
 
-	@Override
-	public ByteBuffer next() {
-		if (m_index < m_count - 1) {
-			m_index++;
-			return m_byteBuffer;
-		}
+    public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id, SimpleStateEnum simpleState, String featureID) {
+        m_byteBufferDeque = new ArrayDeque<>(1);
+        m_byteBufferDeque.add(byteBuffer);
+        m_ids = new ArrayDeque<>(1);
+        m_ids.push(id);
+        m_simpleStates = new ArrayDeque<>(1);
+        m_simpleStates.push(simpleState);
+        m_featureIDs = new ArrayDeque<>(1);
+        m_featureIDs.push(featureID);
+    }
 
-		return null;
-	}
+    @Deprecated
+    public SimpleByteBufferCursor(ByteBuffer[] byteBufferArray) {
+        m_byteBufferDeque = Arrays.stream(byteBufferArray).collect(Collectors.toCollection(ArrayDeque::new));
+    }
+
+    @Deprecated
+    public SimpleByteBufferCursor(List<ByteBuffer> byteBufferArray) {
+        m_byteBufferDeque = new ArrayDeque<>(byteBufferArray);
+    }
+
+    public SimpleByteBufferCursor(ArrayDeque<ByteBuffer> byteBufferArrayDeque, ArrayDeque<Long> ids) {
+        m_byteBufferDeque = byteBufferArrayDeque;
+        m_ids = ids;
+    }
+
+    public SimpleByteBufferCursor(ArrayDeque<ByteBuffer> arrayDeque,
+                                  ArrayDeque<Long> ids,
+                                  ArrayDeque<SimpleStateEnum> simpleStates,
+                                  ArrayDeque<String> featureIDs) {
+        if ((arrayDeque.size() & ids.size() & simpleStates.size() & featureIDs.size()) != arrayDeque.size()) {
+            throw new GeometryException("arrays must be same size");
+        }
+        m_byteBufferDeque = arrayDeque;
+        m_ids = ids;
+        m_simpleStates = simpleStates;
+        m_featureIDs = featureIDs;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return m_byteBufferDeque.size() > 0;
+    }
+
+    @Override
+    public long getByteBufferID() {
+        return m_current_id;
+    }
+
+    @Override
+    public SimpleStateEnum getSimpleState() {
+        return m_currentSimpleState;
+    }
+
+    @Override
+    public String getFeatureID() { return m_currentFeatureID; }
+
+    void _incrementInternals() {
+        if (m_ids != null && !m_ids.isEmpty()) {
+            m_current_id = m_ids.pop();
+        } else {
+            m_current_id++;
+        }
+
+        if (m_simpleStates != null && !m_simpleStates.isEmpty()) {
+            m_currentSimpleState = m_simpleStates.pop();
+        }
+        if (m_featureIDs != null && !m_featureIDs.isEmpty()) {
+            m_currentFeatureID = m_featureIDs.pop();
+        }
+    }
+
+    @Override
+    public ByteBuffer next() {
+        if (hasNext()) {
+            _incrementInternals();
+            return m_byteBufferDeque.pop();
+        }
+
+        return null;
+    }
 
 }
