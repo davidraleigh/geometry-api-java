@@ -24,7 +24,7 @@
 
 package com.esri.core.geometry;
 
-final class MathUtils {
+public final class MathUtils {
 	/**
 	 * The implementation of the Kahan summation algorithm. Use to get better
 	 * precision when adding a lot of values.

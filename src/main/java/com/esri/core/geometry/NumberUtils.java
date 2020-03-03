@@ -58,7 +58,7 @@ public class NumberUtils {
 		return 1;
 	}
 
-	static boolean isNaN(double d) {
+	public static boolean isNaN(double d) {
 		return Double.isNaN(d);
 	}
 

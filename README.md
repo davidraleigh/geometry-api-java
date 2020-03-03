@@ -18,6 +18,11 @@ Building the source:
 1. Deploy the esri-geometry-api.jar to the target system, add a reference to it in a Java project.
 1. To run the unit-tests, run the `mvn test` command-line command from within the cloned directory.
 
+Building the source from gradle:
+```bash
+./gradle build install
+```
+
 The project is also available as a [Maven](http://maven.apache.org/) dependency:
 
 ```xml
