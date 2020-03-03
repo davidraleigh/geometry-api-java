@@ -46,11 +46,6 @@ public class OperatorImportFromESRIShapeCursor extends GeometryCursor {
 	}
 
 	@Override
-	public boolean hasNext() {
-		return m_inputShapeBuffers != null && m_inputShapeBuffers.hasNext();
-	}
-
-	@Override
 	public Geometry next() {
 		ByteBuffer shapeBuffer = m_inputShapeBuffers.next();
 		if (shapeBuffer != null) {
@@ -60,8 +55,8 @@ public class OperatorImportFromESRIShapeCursor extends GeometryCursor {
 	}
 
 	@Override
-	public SimpleStateEnum getSimpleState() {
-		return m_inputShapeBuffers.getSimpleState();
+	public int getGeometryID() {
+		return m_inputShapeBuffers.getByteBufferID();
 	}
 
 	@Override
@@ -70,8 +65,13 @@ public class OperatorImportFromESRIShapeCursor extends GeometryCursor {
 	}
 
 	@Override
-	public int getGeometryID() {
-		return m_inputShapeBuffers.getByteBufferID();
+	public SimpleStateEnum getSimpleState() {
+		return m_inputShapeBuffers.getSimpleState();
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_inputShapeBuffers != null && m_inputShapeBuffers.hasNext();
 	}
 
 	private Geometry importFromESRIShape(ByteBuffer shapeBuffer) {

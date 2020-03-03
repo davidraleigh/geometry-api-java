@@ -44,23 +44,8 @@ public class OperatorExportToJsonCursor extends StringCursor {
 	}
 
 	@Override
-	public boolean hasNext() {
-		return m_geometryCursor != null && m_geometryCursor.hasNext();
-	}
-
-	@Override
 	public int getID() {
 		return m_geometryCursor.getGeometryID();
-	}
-
-	@Override
-	public SimpleStateEnum getSimpleState() {
-		return simpleStateEnum;
-	}
-
-	@Override
-	public String getFeatureID() {
-		return m_geometryCursor.getFeatureID();
 	}
 
 	@Override
@@ -72,6 +57,21 @@ public class OperatorExportToJsonCursor extends StringCursor {
 			return exportToString(geometry, m_spatialReference, null);
 		}
 		return null;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_geometryCursor.getFeatureID();
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return simpleStateEnum;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_geometryCursor != null && m_geometryCursor.hasNext();
 	}
 
 	static String exportToString(Geometry geometry, SpatialReference spatialReference, Map<String, Object> exportProperties) {

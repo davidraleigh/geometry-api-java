@@ -55,22 +55,22 @@ import static com.esri.core.geometry.SizeOf.SIZE_OF_OGC_CONCRETE_GEOMETRY_COLLEC
 
 public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 	static public String TYPE = "GeometryCollection";
-	
+
 	List<OGCGeometry> geometries;
-	
+
 	public OGCConcreteGeometryCollection(List<OGCGeometry> geoms,
-			SpatialReference sr) {
+	                                     SpatialReference sr) {
 		geometries = geoms;
 		esriSR = sr;
 	}
-	
+
 	public OGCConcreteGeometryCollection(GeometryCursor geoms,
-			SpatialReference sr) {
+	                                     SpatialReference sr) {
 		List<OGCGeometry> ogcGeoms = new ArrayList<OGCGeometry>(10);
-		for (Geometry g = geoms.next(); g != null; g = geoms.next()) {
-			ogcGeoms.add(createFromEsriGeometry(g, sr));
+		while (geoms.hasNext()) {
+			ogcGeoms.add(createFromEsriGeometry(geoms.next(), sr));
 		}
-		
+
 		geometries = ogcGeoms;
 		esriSR = sr;
 	}
@@ -85,7 +85,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		geometries = new ArrayList<OGCGeometry>();
 		esriSR = sr;
 	}
-	
+
 	@Override
 	public int dimension() {
 		int maxD = 0;
@@ -114,10 +114,10 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 	public OGCGeometry envelope() {
 		GeometryCursor gc = getEsriGeometryCursor();
 		Envelope env = new Envelope();
-		for (Geometry g = gc.next(); g != null; g = gc.next()) {
-			Envelope e = new Envelope();
-			g.queryEnvelope(e);
-			env.merge(e);
+		Envelope geomEnv = new Envelope();
+		while (gc.hasNext()) {
+			gc.next().queryEnvelope(geomEnv);
+			env.merge(geomEnv);
 		}
 
 		Polygon polygon = new Polygon();
@@ -306,7 +306,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 	/**
 	 * makeSimpleRelaxed is not supported for the GeometryCollection instance.
-	 * 
+	 *
 	 */
 	@Override
 	public OGCGeometry makeSimple() {
@@ -323,7 +323,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 	/**
 	 * makeSimpleRelaxed is not supported for the GeometryCollection instance.
-	 * 
+	 *
 	 */
 	@Override
 	public OGCGeometry makeSimpleRelaxed(boolean forceProcessing) {
@@ -410,8 +410,13 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 			return m_index;
 		}
 
+		@Override
+		public boolean hasNext() {
+			return m_ind < m_geoms.size();
+		}
+
 	}
-	
+
 	@Override
 	public OGCGeometry convexHull() {
 		GeometryCursor cursor = OperatorConvexHull.local().execute(
@@ -419,21 +424,21 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		MultiPoint mp = new MultiPoint();
 		Polygon polygon = new Polygon();
 		VertexDescription vd = null;
-		for (Geometry geom = cursor.next(); geom != null; geom = cursor.next()) {
+		Geometry geom;
+		while (cursor.hasNext()) {
+			// for (Geometry geom = cursor.next(); geom != null; geom = cursor.next())
+			geom = cursor.next();
 			vd = geom.getDescription();
 			if (geom.isEmpty())
 				continue;
 
 			if (geom.getType() == Geometry.Type.Polygon) {
 				polygon.add((MultiPath) geom, false);
-			}
-			else if (geom.getType() == Geometry.Type.Polyline) {
+			} else if (geom.getType() == Geometry.Type.Polyline) {
 				mp.add((MultiVertexGeometry) geom, 0, -1);
-			}
-			else if (geom.getType() == Geometry.Type.Point) {
+			} else if (geom.getType() == Geometry.Type.Point) {
 				mp.add((Point) geom);
-			}
-			else {
+			} else {
 				throw new GeometryException("internal error");
 			}
 		}
@@ -445,11 +450,10 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 		if (!polygon.isEmpty()) {
 			if (resultGeom != null && !resultGeom.isEmpty()) {
-				Geometry[] geoms = { resultGeom, polygon };
+				Geometry[] geoms = {resultGeom, polygon};
 				resultGeom = OperatorConvexHull.local().execute(
 						new SimpleGeometryCursor(geoms), true, null).next();
-			}
-			else {
+			} else {
 				resultGeom = OperatorConvexHull.local().execute(polygon, null);
 			}
 		}
@@ -478,18 +482,18 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 	public OGCGeometry convertToMulti() {
 		return this;
 	}
-	
+
 	@Override
 	public OGCGeometry reduceFromMulti() {
 		int n = numGeometries();
 		if (n == 0) {
 			return this;
 		}
-		
+
 		if (n == 1) {
 			return geometryN(0).reduceFromMulti();
 		}
-		
+
 		return this;
 	}
 
@@ -499,7 +503,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 	}
 
 	@Override
-	public boolean equals(Object other)	{
+	public boolean equals(Object other) {
 		if (other == null)
 			return false;
 
@@ -508,23 +512,22 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 		if (other.getClass() != getClass())
 			return false;
-		
-		OGCConcreteGeometryCollection another = (OGCConcreteGeometryCollection)other;
-		if (geometries != null) {		
+
+		OGCConcreteGeometryCollection another = (OGCConcreteGeometryCollection) other;
+		if (geometries != null) {
 			if (!geometries.equals(another.geometries))
 				return false;
-		}
-		else if (another.geometries != null)
+		} else if (another.geometries != null)
 			return false;
-		
+
 		if (esriSR == another.esriSR) {
 			return true;
 		}
-			
+
 		if (esriSR != null && another.esriSR != null) {
 			return esriSR.equals(another.esriSR);
 		}
-			
+
 		return false;
 	}
 
@@ -533,13 +536,13 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		int hash = 1;
 		if (geometries != null)
 			hash = geometries.hashCode();
-		
+
 		if (esriSR != null)
 			hash = NumberUtils.hashCombine(hash, esriSR.hashCode());
-		
+
 		return hash;
 	}
-	
+
 	@Override
 	public double distance(OGCGeometry another) {
 		if (this == another)
@@ -560,7 +563,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 		return minD;
 	}
-	
+
 	//
 	//Relational operations
 	@Override
@@ -568,24 +571,24 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		//TODO
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public boolean touches(OGCGeometry another) {
 		//TODO
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public boolean crosses(OGCGeometry another) {
 		//TODO
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public boolean relate(OGCGeometry another, String matrix) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public boolean disjoint(OGCGeometry another) {
 		if (isEmpty() || another.isEmpty())
@@ -595,7 +598,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 			return false;
 
 		//TODO: a simple envelope test
-		
+
 		OGCConcreteGeometryCollection flattened1 = flatten();
 		if (flattened1.isEmpty())
 			return true;
@@ -603,7 +606,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		OGCConcreteGeometryCollection flattened2 = otherCol.flatten();
 		if (flattened2.isEmpty())
 			return true;
-		
+
 		for (int i = 0, n1 = flattened1.numGeometries(); i < n1; ++i) {
 			OGCGeometry g1 = flattened1.geometryN(i);
 			for (int j = 0, n2 = flattened2.numGeometries(); j < n2; ++j) {
@@ -612,29 +615,29 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 					return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean contains(OGCGeometry another) {
 		if (isEmpty() || another.isEmpty())
 			return false;
-		
+
 		if (this == another)
 			return true;
 
 		return another.difference(this).isEmpty();
 	}
-	
+
 	@Override
 	public boolean Equals(OGCGeometry another) {
 		if (this == another)
 			return !isEmpty();
-		
+
 		if (another == null)
 			return false;
-		
+
 
 		OGCGeometry g1 = reduceFromMulti();
 		String t1 = g1.geometryType();
@@ -642,13 +645,13 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		if (t1 != g2.geometryType()) {
 			return false;
 		}
-		
+
 		if (t1 != OGCConcreteGeometryCollection.TYPE) {
 			return g1.Equals(g2);
 		}
-		
-		OGCConcreteGeometryCollection gc1 = (OGCConcreteGeometryCollection)g1;
-		OGCConcreteGeometryCollection gc2 = (OGCConcreteGeometryCollection)g2;
+
+		OGCConcreteGeometryCollection gc1 = (OGCConcreteGeometryCollection) g1;
+		OGCConcreteGeometryCollection gc2 = (OGCConcreteGeometryCollection) g2;
 		// TODO Assuming input geometries are simple and valid, remove-overlaps would be a no-op.
 		// Hence, calling flatten() should be sufficient.
 		gc1 = gc1.flattenAndRemoveOverlaps();
@@ -657,18 +660,17 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		if (n != gc2.numGeometries()) {
 			return false;
 		}
-		
+
 		for (int i = 0; i < n; ++i) {
 			if (!gc1.geometryN(i).Equals(gc2.geometryN(i))) {
 				return false;
 			}
 		}
-		
+
 		return n > 0;
 	}
 
-	private static OGCConcreteGeometryCollection toGeometryCollection(OGCGeometry geometry)
-	{
+	private static OGCConcreteGeometryCollection toGeometryCollection(OGCGeometry geometry) {
 		if (geometry.geometryType() != OGCConcreteGeometryCollection.TYPE) {
 			return new OGCConcreteGeometryCollection(geometry, geometry.getEsriSpatialReference());
 		}
@@ -676,11 +678,10 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		return (OGCConcreteGeometryCollection) geometry;
 	}
 
-	private static List<Geometry> toList(GeometryCursor cursor)
-	{
-		List<Geometry> geometries = new ArrayList<Geometry>();
-		for (Geometry geometry = cursor.next(); geometry != null; geometry = cursor.next()) {
-			geometries.add(geometry);
+	private static List<Geometry> toList(GeometryCursor cursor) {
+		List<Geometry> geometries = new ArrayList<>();
+		while (cursor.hasNext()) {
+			geometries.add(cursor.next());
 		}
 		return geometries;
 	}
@@ -716,10 +717,10 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		if (result.size() == 1) {
 			return result.get(0).reduceFromMulti();
 		}
-		
+
 		return new OGCConcreteGeometryCollection(result, esriSR).flattenAndRemoveOverlaps();
 	}
-	
+
 	@Override
 	public OGCGeometry intersection(OGCGeometry another) {
 		if (isEmpty() || another.isEmpty()) {
@@ -739,14 +740,14 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 				}
 			}
 		}
-		
+
 		if (result.size() == 1) {
 			return result.get(0).reduceFromMulti();
 		}
 
 		return new OGCConcreteGeometryCollection(result, esriSR).flattenAndRemoveOverlaps();
 	}
-	
+
 	@Override
 	public OGCGeometry symDifference(OGCGeometry another) {
 		//TODO
@@ -755,6 +756,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 	/**
 	 * Checks if collection is flattened.
+	 *
 	 * @return True for the flattened collection. A flattened collection contains up to three non-empty geometries:
 	 * an OGCMultiPoint, an OGCMultiPolygon, and an OGCMultiLineString.
 	 */
@@ -768,11 +770,11 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 			OGCGeometry g = geometryN(i);
 			if (g.isEmpty())
 				return false;//no empty allowed
-			
+
 			String t = g.geometryType();
 			if (t != OGCMultiPoint.TYPE && t != OGCMultiPolygon.TYPE && t != OGCMultiLineString.TYPE)
 				return false;
-			
+
 			//check strict order of geometry dimensions
 			int d = g.dimension();
 			if (d <= dimension)
@@ -780,7 +782,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 			dimension = d;
 		}
-		
+
 		return true;
 	}
 
@@ -788,13 +790,14 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 	 * Flattens Geometry Collection.
 	 * The result collection contains up to three geometries:
 	 * an OGCMultiPoint, an OGCMultilineString, and an OGCMultiPolygon (in that order).
+	 *
 	 * @return A flattened Geometry Collection, or self if already flattened.
 	 */
 	public OGCConcreteGeometryCollection flatten() {
 		if (isFlattened()) {
 			return this;
 		}
-		
+
 		OGCMultiPoint multiPoint = null;
 		ArrayList<Geometry> polygons = null;
 		OGCMultiLineString polyline = null;
@@ -802,7 +805,7 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		for (Geometry g = gc.next(); g != null; g = gc.next()) {
 			if (g.isEmpty())
 				continue;
-			
+
 			Geometry.Type t = g.getType();
 
 			if (t == Geometry.Type.Point) {
@@ -810,34 +813,34 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 					multiPoint = new OGCMultiPoint(esriSR);
 				}
 
-				((MultiPoint)multiPoint.getEsriGeometry()).add((Point)g);
+				((MultiPoint) multiPoint.getEsriGeometry()).add((Point) g);
 				continue;
 			}
 
 			if (t == Geometry.Type.MultiPoint) {
 				if (multiPoint == null)
 					multiPoint = new OGCMultiPoint(esriSR);
-				
-				((MultiPoint)multiPoint.getEsriGeometry()).add((MultiPoint)g, 0, -1);
+
+				((MultiPoint) multiPoint.getEsriGeometry()).add((MultiPoint) g, 0, -1);
 				continue;
 			}
-			
+
 			if (t == Geometry.Type.Polyline) {
 				if (polyline == null)
 					polyline = new OGCMultiLineString(esriSR);
-				
-				((MultiPath)polyline.getEsriGeometry()).add((Polyline)g, false);
+
+				((MultiPath) polyline.getEsriGeometry()).add((Polyline) g, false);
 				continue;
 			}
-			
+
 			if (t == Geometry.Type.Polygon) {
 				if (polygons == null)
 					polygons = new ArrayList<Geometry>();
-				
+
 				polygons.add(g);
 				continue;
 			}
-			
+
 			throw new GeometryException("internal error");//what else?
 		}
 
@@ -848,26 +851,27 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 
 		if (polyline != null)
 			list.add(polyline);
-		
+
 		if (polygons != null) {
 			GeometryCursor unionedPolygons = OperatorUnion.local().execute(new SimpleGeometryCursor(polygons), esriSR, null);
 			Geometry g = unionedPolygons.next();
 			if (!g.isEmpty()) {
-				list.add(new OGCMultiPolygon((Polygon)g, esriSR));
+				list.add(new OGCMultiPolygon((Polygon) g, esriSR));
 			}
 
 		}
 
 		return new OGCConcreteGeometryCollection(list, esriSR);
 	}
-	
+
 	/**
 	 * Fixes topological overlaps in the GeometryCollecion.
 	 * This is equivalent to union of the geometry collection elements.
-	 *
+	 * <p>
 	 * TODO "flattened" collection is supposed to contain only mutli-geometries, but this method may return single geometries
 	 * e.g. for GEOMETRYCOLLECTION (LINESTRING (...)) it returns GEOMETRYCOLLECTION (LINESTRING (...))
 	 * and not GEOMETRYCOLLECTION (MULTILINESTRING (...))
+	 *
 	 * @return A geometry collection that is flattened and has no overlapping elements.
 	 */
 	public OGCConcreteGeometryCollection flattenAndRemoveOverlaps() {
@@ -885,33 +889,34 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 			Geometry current = geoms.get(i);
 			if (current.isEmpty())
 				continue;
-			
+
 			for (int j = i + 1; j < geoms.size(); ++j) {
 				Geometry subG = geoms.get(j);
 				current = OperatorDifference.local().execute(current, subG, esriSR, null);
 				if (current.isEmpty())
 					break;
 			}
-			
+
 			if (current.isEmpty())
 				continue;
-			
+
 			result.add(current);
 		}
-		
+
 		return new SimpleGeometryCursor(result);
 	}
-	
+
 	private static class FlatteningCollectionCursor extends GeometryCursor {
 		private List<OGCConcreteGeometryCollection> m_collections;
 		private GeometryCursor m_current;
 		private int m_index;
+
 		FlatteningCollectionCursor(List<OGCConcreteGeometryCollection> collections) {
 			m_collections = collections;
 			m_index = -1;
 			m_current = null;
 		}
-		
+
 		@Override
 		public Geometry next() {
 			while (m_collections != null) {
@@ -921,22 +926,19 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 						m_current = null;
 						continue;
 					}
-					
+
 					return g;
-				}
-				else {
+				} else {
 					m_index++;
 					if (m_index < m_collections.size()) {
 						m_current = m_collections.get(m_index).flatten().getEsriGeometryCursor();
-						continue;
-					}
-					else {
+					} else {
 						m_collections = null;
 						m_index = -1;
 					}
 				}
 			}
-			
+
 			return null;
 		}
 
@@ -944,14 +946,14 @@ public class OGCConcreteGeometryCollection extends OGCGeometryCollection {
 		public int getGeometryID() {
 			return m_index;
 		}
-		
-	};
-	
+
+	}
+
 	//Collectively processes group of geometry collections (intersects all segments and clusters points).
 	//Flattens collections, removes overlaps.
 	//Once done, the result collections would work well for topological and relational operations.
 	private GeometryCursor prepare_for_ops_(OGCConcreteGeometryCollection collection) {
-		assert(collection != null && !collection.isEmpty());
+		assert (collection != null && !collection.isEmpty());
 		GeometryCursor prepared = OGCStructureInternal.prepare_for_ops_(collection.flatten().getEsriGeometryCursor(), esriSR);
 		return removeOverlapsHelper_(toList(prepared));
 	}

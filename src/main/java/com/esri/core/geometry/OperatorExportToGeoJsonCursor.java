@@ -64,23 +64,8 @@ public class OperatorExportToGeoJsonCursor extends StringCursor {
 	}
 
 	@Override
-	public boolean hasNext() {
-		return m_geometryCursor != null && m_geometryCursor.hasNext();
-	}
-
-	@Override
 	public int getID() {
 		return m_geometryCursor.getGeometryID();
-	}
-
-	@Override
-	public SimpleStateEnum getSimpleState() {
-		return simpleStateEnum;
-	}
-
-	@Override
-	public String getFeatureID() {
-		return m_geometryCursor.getFeatureID();
 	}
 
 	@Override
@@ -92,6 +77,21 @@ public class OperatorExportToGeoJsonCursor extends StringCursor {
 			return exportToGeoJson(m_export_flags, geometry, m_spatialReference);
 		}
 		return null;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_geometryCursor.getFeatureID();
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return simpleStateEnum;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_geometryCursor != null && m_geometryCursor.hasNext();
 	}
 
 	// Mirrors wkt
