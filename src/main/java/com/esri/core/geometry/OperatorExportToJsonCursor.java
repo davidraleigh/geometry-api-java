@@ -25,35 +25,50 @@ package com.esri.core.geometry;
 
 import com.esri.core.geometry.VertexDescription.Semantics;
 
-import java.io.IOException;
 import java.util.Map;
 
-class OperatorExportToJsonCursor extends JsonCursor {
+public class OperatorExportToJsonCursor extends StringCursor {
 
-	GeometryCursor m_inputGeometryCursor;
-	SpatialReference m_spatialReference;
-	int m_index;
+	private GeometryCursor m_geometryCursor;
+	private SpatialReference m_spatialReference;
+	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+
 
 	public OperatorExportToJsonCursor(SpatialReference spatialReference, GeometryCursor geometryCursor) {
-		m_index = -1;
 		if (geometryCursor == null) {
 			throw new IllegalArgumentException();
 		}
 
-		m_inputGeometryCursor = geometryCursor;
+		m_geometryCursor = geometryCursor;
 		m_spatialReference = spatialReference;
 	}
 
 	@Override
-	public int getID() {
-		return m_index;
+	public boolean hasNext() {
+		return m_geometryCursor != null && m_geometryCursor.hasNext();
+	}
+
+	@Override
+	public long getID() {
+		return m_geometryCursor.getGeometryID();
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return simpleStateEnum;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_geometryCursor.getFeatureID();
 	}
 
 	@Override
 	public String next() {
 		Geometry geometry;
-		if ((geometry = m_inputGeometryCursor.next()) != null) {
-			m_index = m_inputGeometryCursor.getGeometryID();
+		if (hasNext()) {
+			geometry = m_geometryCursor.next();
+			simpleStateEnum = geometry.getSimpleState();
 			return exportToString(geometry, m_spatialReference, null);
 		}
 		return null;
@@ -69,28 +84,28 @@ class OperatorExportToJsonCursor extends JsonCursor {
 		try {
 			int type = geometry.getType().value();
 			switch (type) {
-			case Geometry.GeometryType.Point:
-				exportPointToJson((Point) geometry, spatialReference, jsonWriter, exportProperties);
-				break;
+				case Geometry.GeometryType.Point:
+					exportPointToJson((Point) geometry, spatialReference, jsonWriter, exportProperties);
+					break;
 
-			case Geometry.GeometryType.MultiPoint:
-				exportMultiPointToJson((MultiPoint) geometry, spatialReference, jsonWriter, exportProperties);
-				break;
+				case Geometry.GeometryType.MultiPoint:
+					exportMultiPointToJson((MultiPoint) geometry, spatialReference, jsonWriter, exportProperties);
+					break;
 
-			case Geometry.GeometryType.Polyline:
-				exportPolylineToJson((Polyline) geometry, spatialReference, jsonWriter, exportProperties);
-				break;
+				case Geometry.GeometryType.Polyline:
+					exportPolylineToJson((Polyline) geometry, spatialReference, jsonWriter, exportProperties);
+					break;
 
-			case Geometry.GeometryType.Polygon:
-				exportPolygonToJson((Polygon) geometry, spatialReference, jsonWriter, exportProperties);
-				break;
+				case Geometry.GeometryType.Polygon:
+					exportPolygonToJson((Polygon) geometry, spatialReference, jsonWriter, exportProperties);
+					break;
 
-			case Geometry.GeometryType.Envelope:
-				exportEnvelopeToJson((Envelope) geometry, spatialReference, jsonWriter, exportProperties);
-				break;
+				case Geometry.GeometryType.Envelope:
+					exportEnvelopeToJson((Envelope) geometry, spatialReference, jsonWriter, exportProperties);
+					break;
 
-			default:
-				throw new RuntimeException("not implemented for this geometry type");
+				default:
+					throw new RuntimeException("not implemented for this geometry type");
 			}
 
 		} catch (Exception e) {

@@ -47,33 +47,48 @@ package com.esri.core.geometry;
 
 import com.esri.core.geometry.VertexDescription.Semantics;
 
-class OperatorExportToGeoJsonCursor extends JsonCursor {
-	GeometryCursor m_inputGeometryCursor;
-	SpatialReference m_spatialReference;
-	int m_index;
-	int m_export_flags;
+public class OperatorExportToGeoJsonCursor extends StringCursor {
+	private GeometryCursor m_geometryCursor;
+	private SpatialReference m_spatialReference;
+	private int m_export_flags;
+	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
 
 	public OperatorExportToGeoJsonCursor(int export_flags, SpatialReference spatialReference,
-			GeometryCursor geometryCursor) {
-		m_index = -1;
+	                                     GeometryCursor geometryCursor) {
 		if (geometryCursor == null)
 			throw new IllegalArgumentException();
 
 		m_export_flags = export_flags;
 		m_spatialReference = spatialReference;
-		m_inputGeometryCursor = geometryCursor;
+		m_geometryCursor = geometryCursor;
 	}
 
 	@Override
-	public int getID() {
-		return m_index;
+	public boolean hasNext() {
+		return m_geometryCursor != null && m_geometryCursor.hasNext();
+	}
+
+	@Override
+	public long getID() {
+		return m_geometryCursor.getGeometryID();
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return simpleStateEnum;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_geometryCursor.getFeatureID();
 	}
 
 	@Override
 	public String next() {
 		Geometry geometry;
-		if ((geometry = m_inputGeometryCursor.next()) != null) {
-			m_index = m_inputGeometryCursor.getGeometryID();
+		if (hasNext()) {
+			geometry = m_geometryCursor.next();
+			simpleStateEnum = geometry.getSimpleState();
 			return exportToGeoJson(m_export_flags, geometry, m_spatialReference);
 		}
 		return null;
@@ -114,34 +129,34 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 	private static void exportGeometryToGeoJson_(int export_flags, Geometry geometry, JsonWriter json_writer) {
 		int type = geometry.getType().value();
 		switch (type) {
-		case Geometry.GeometryType.Polygon:
-			exportPolygonToGeoJson_(export_flags, (Polygon) geometry, json_writer);
-			return;
+			case Geometry.GeometryType.Polygon:
+				exportPolygonToGeoJson_(export_flags, (Polygon) geometry, json_writer);
+				return;
 
-		case Geometry.GeometryType.Polyline:
-			exportPolylineToGeoJson_(export_flags, (Polyline) geometry, json_writer);
-			return;
+			case Geometry.GeometryType.Polyline:
+				exportPolylineToGeoJson_(export_flags, (Polyline) geometry, json_writer);
+				return;
 
-		case Geometry.GeometryType.MultiPoint:
-			exportMultiPointToGeoJson_(export_flags, (MultiPoint) geometry, json_writer);
-			return;
+			case Geometry.GeometryType.MultiPoint:
+				exportMultiPointToGeoJson_(export_flags, (MultiPoint) geometry, json_writer);
+				return;
 
-		case Geometry.GeometryType.Point:
-			exportPointToGeoJson_(export_flags, (Point) geometry, json_writer);
-			return;
+			case Geometry.GeometryType.Point:
+				exportPointToGeoJson_(export_flags, (Point) geometry, json_writer);
+				return;
 
-		case Geometry.GeometryType.Envelope:
-			exportEnvelopeToGeoJson_(export_flags, (Envelope) geometry,
-					json_writer);
-			return;
+			case Geometry.GeometryType.Envelope:
+				exportEnvelopeToGeoJson_(export_flags, (Envelope) geometry,
+						json_writer);
+				return;
 
-		default:
-			throw new RuntimeException("not implemented for this geometry type");
+			default:
+				throw new RuntimeException("not implemented for this geometry type");
 		}
 	}
 
 	private static void exportSpatialReference(int export_flags, SpatialReference spatial_reference,
-			JsonWriter json_writer) {
+	                                           JsonWriter json_writer) {
 		if (spatial_reference != null) {
 			int wkid = spatial_reference.getLatestID();
 
@@ -407,9 +422,9 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiPolygonTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int polygon_count, int path_count,
-			JsonWriter json_writer) {
+	                                            boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                            AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int polygon_count, int path_count,
+	                                            JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("MultiPolygon");
 
@@ -431,8 +446,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiPolygonTaggedTextFromEnvelope_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
-			double mmin, double mmax, JsonWriter json_writer) {
+	                                                        boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
+	                                                        double mmin, double mmax, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("MultiPolygon");
 
@@ -454,8 +469,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiLineStringTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
+	                                               boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                               AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("MultiLineString");
 
@@ -477,8 +492,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiPointTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			int point_count, JsonWriter json_writer) {
+	                                          boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                          int point_count, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("MultiPoint");
 
@@ -496,7 +511,7 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiPointTaggedTextFromPoint_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, double x, double y, double z, double m, JsonWriter json_writer) {
+	                                                   boolean b_export_ms, double x, double y, double z, double m, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("MultiPoint");
 
@@ -517,8 +532,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void polygonTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
+	                                       AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                       AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("Polygon");
 
@@ -536,8 +551,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void polygonTaggedTextFromEnvelope_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
-			double mmin, double mmax, JsonWriter json_writer) {
+	                                                   boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
+	                                                   double mmin, double mmax, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("Polygon");
 
@@ -555,8 +570,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void lineStringTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, JsonWriter json_writer) {
+	                                          boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                          AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("LineString");
 
@@ -576,7 +591,7 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void pointTaggedText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			double x, double y, double z, double m, JsonWriter json_writer) {
+	                                     double x, double y, double z, double m, JsonWriter json_writer) {
 		json_writer.addFieldName("type");
 		json_writer.addValueString("Point");
 
@@ -594,9 +609,9 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiPolygonText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int polygon_count, int path_count,
-			JsonWriter json_writer) {
+	                                      AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                      AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int polygon_count, int path_count,
+	                                      JsonWriter json_writer) {
 		int polygon_start = 0;
 		int polygon_end = 1;
 
@@ -621,8 +636,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void multiLineStringText_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
+	                                         boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                         AttributeStreamOfInt8 path_flags, AttributeStreamOfInt32 paths, int path_count, JsonWriter json_writer) {
 		boolean b_closed = ((path_flags.read(0) & PathFlags.enumClosed) != 0);
 
 		lineStringText_(false, b_closed, precision, bFixedPoint, b_export_zs, b_export_ms, zs, ms, position, 0,
@@ -640,8 +655,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void polygonText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
-			AttributeStreamOfInt32 paths, int polygon_start, int polygon_end, JsonWriter json_writer) {
+	                                 AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position,
+	                                 AttributeStreamOfInt32 paths, int polygon_start, int polygon_end, JsonWriter json_writer) {
 		json_writer.startArray();
 
 		int istart = paths.read(polygon_start);
@@ -661,8 +676,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void lineStringText_(boolean bRing, boolean b_closed, int precision, boolean bFixedPoint,
-			boolean b_export_zs, boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
-			AttributeStreamOfDbl position, int istart, int iend, JsonWriter json_writer) {
+	                                    boolean b_export_zs, boolean b_export_ms, AttributeStreamOfDbl zs, AttributeStreamOfDbl ms,
+	                                    AttributeStreamOfDbl position, int istart, int iend, JsonWriter json_writer) {
 		if (istart == iend) {
 			json_writer.startArray();
 			json_writer.endArray();
@@ -693,7 +708,7 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static int pointText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			double x, double y, double z, double m, JsonWriter json_writer) {
+	                              double x, double y, double z, double m, JsonWriter json_writer) {
 
 		json_writer.startArray();
 
@@ -713,8 +728,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void pointText_(int precision, boolean bFixedPoint, boolean b_export_zs, boolean b_export_ms,
-			AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position, int point,
-			JsonWriter json_writer) {
+	                               AttributeStreamOfDbl zs, AttributeStreamOfDbl ms, AttributeStreamOfDbl position, int point,
+	                               JsonWriter json_writer) {
 		double x = position.readAsDbl(2 * point);
 		double y = position.readAsDbl(2 * point + 1);
 		double z = NumberUtils.NaN();
@@ -731,8 +746,8 @@ class OperatorExportToGeoJsonCursor extends JsonCursor {
 
 	// Mirrors wkt
 	private static void writeEnvelopeAsGeoJsonPolygon_(int precision, boolean bFixedPoint, boolean b_export_zs,
-			boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
-			double mmin, double mmax, JsonWriter json_writer) {
+	                                                   boolean b_export_ms, double xmin, double ymin, double xmax, double ymax, double zmin, double zmax,
+	                                                   double mmin, double mmax, JsonWriter json_writer) {
 		json_writer.startArray();
 		json_writer.startArray();
 

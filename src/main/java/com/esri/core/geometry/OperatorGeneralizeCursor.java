@@ -25,13 +25,12 @@ package com.esri.core.geometry;
 
 final class OperatorGeneralizeCursor extends GeometryCursor {
 	ProgressTracker m_progressTracker;
-	GeometryCursor m_geoms;
 	double m_maxDeviation;
 	boolean m_bRemoveDegenerateParts;
 
 	public OperatorGeneralizeCursor(GeometryCursor geoms, double maxDeviation,
-			boolean bRemoveDegenerateParts, ProgressTracker progressTracker) {
-		m_geoms = geoms;
+	                                boolean bRemoveDegenerateParts, ProgressTracker progressTracker) {
+		m_inputGeoms = geoms;
 		m_maxDeviation = maxDeviation;
 		m_progressTracker = progressTracker;
 		m_bRemoveDegenerateParts = bRemoveDegenerateParts;
@@ -40,16 +39,10 @@ final class OperatorGeneralizeCursor extends GeometryCursor {
 	@Override
 	public Geometry next() {
 		// TODO Auto-generated method stub
-		Geometry geom = m_geoms.next();
+		Geometry geom = m_inputGeoms.next();
 		if (geom == null)
 			return null;
 		return Generalize(geom);
-	}
-
-	@Override
-	public int getGeometryID() {
-		// TODO Auto-generated method stub
-		return m_geoms.getGeometryID();
 	}
 
 	private Geometry Generalize(Geometry geom) {
@@ -75,7 +68,7 @@ final class OperatorGeneralizeCursor extends GeometryCursor {
 	}
 
 	private void GeneralizePath(MultiPathImpl mpsrc, int ipath,
-			MultiPathImpl mpdst, Line lineHelper) {
+	                            MultiPathImpl mpdst, Line lineHelper) {
 		if (mpsrc.getPathSize(ipath) < 2)
 			return;
 		int start = mpsrc.getPathStart(ipath);
@@ -148,7 +141,7 @@ final class OperatorGeneralizeCursor extends GeometryCursor {
 	}
 
 	private int FindGreatestDistance(Line line, Point2D ptHelper,
-			AttributeStreamOfDbl xy, int start, int end, int pathEnd) {
+	                                 AttributeStreamOfDbl xy, int start, int end, int pathEnd) {
 		int to = end - 1;
 		if (end <= start) {// closed path case. end is equal to the path start.
 			to = pathEnd;

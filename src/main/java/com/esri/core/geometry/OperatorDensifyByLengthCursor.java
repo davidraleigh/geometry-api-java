@@ -25,30 +25,18 @@
 package com.esri.core.geometry;
 
 class OperatorDensifyByLengthCursor extends GeometryCursor {
-
-	GeometryCursor m_inputGeoms;
-	// SpatialReferenceImpl m_spatialReference;
 	double m_maxLength;
-	int m_index;
 
-	public OperatorDensifyByLengthCursor(GeometryCursor inputGeoms1,
-			double maxLength, ProgressTracker progressTracker) {
-		m_index = -1;
-		m_inputGeoms = inputGeoms1;
+	public OperatorDensifyByLengthCursor(GeometryCursor inputGeoms,
+	                                     double maxLength, ProgressTracker progressTracker) {
+		m_inputGeoms = inputGeoms;
 		m_maxLength = maxLength;
 	}
 
 	@Override
-	public int getGeometryID() {
-		return m_index;
-	}
-
-	@Override
 	public Geometry next() {
-		Geometry geom;
-		if ((geom = m_inputGeoms.next()) != null) {
-			m_index = m_inputGeoms.getGeometryID();
-			return densifyByLength(geom);
+		if (hasNext()) {
+			return densifyByLength(m_inputGeoms.next());
 		}
 		return null;
 	}
@@ -119,9 +107,9 @@ class OperatorDensifyByLengthCursor extends GeometryCursor {
 					double dcount = Math.ceil(len / m_maxLength);
 
 					Point point = new Point(geom.getDescription());// LOCALREFCLASS1(Point,
-																	// VertexDescription,
-																	// point,
-																	// geom.getDescription());
+					// VertexDescription,
+					// point,
+					// geom.getDescription());
 					if (bStartNewPath) {
 						bStartNewPath = false;
 						seg.queryStart(point);
@@ -154,7 +142,7 @@ class OperatorDensifyByLengthCursor extends GeometryCursor {
 			}
 		}
 
-		return (Geometry) densifiedPoly;
+		return densifiedPoly;
 	}
 
 }

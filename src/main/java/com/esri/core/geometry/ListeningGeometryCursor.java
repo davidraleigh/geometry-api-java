@@ -23,20 +23,20 @@
  */
 package com.esri.core.geometry;
 
-import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * 
  * A GeometryCursor implementation that allows pushing geometries into it.
- * 
+ * <p>
  * To be used with aggregating operations, OperatorUnion and OperatorConvexHull,
  * when the geometries are not available at the time of the execute method call,
  * but are coming in a stream.
  */
 public final class ListeningGeometryCursor extends GeometryCursor {
+	private Queue<Geometry> m_geomList = new ConcurrentLinkedQueue<Geometry>();
 
-	LinkedList<Geometry> m_geomList = new LinkedList<Geometry>();
-	int m_index = -1;
+	private int m_index = -1;
 
 	public ListeningGeometryCursor() {
 	}
@@ -50,7 +50,7 @@ public final class ListeningGeometryCursor extends GeometryCursor {
 	public Geometry next() {
 		if (m_geomList != null && !m_geomList.isEmpty()) {
 			m_index++;
-			return m_geomList.pollFirst();
+			return m_geomList.poll();
 		}
 
 		m_geomList = null;//prevent the class from being used again
@@ -63,10 +63,20 @@ public final class ListeningGeometryCursor extends GeometryCursor {
 	 * by the OperatorUnion (or OperatorConvexHull with b_merge == true). Call
 	 * next() on the GeometryCursor returned by the OperatorUnion when done
 	 * listening to incoming geometries to finish the union operation.
-	 * 
+	 *
 	 * @param geom The geometry to be pushed into the cursor.
 	 */
 	public void tick(Geometry geom) {
 		m_geomList.add(geom);
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_geomList != null && !m_geomList.isEmpty();
+	}
+
+	@Override
+	public String getFeatureID() {
+		return "";
 	}
 }

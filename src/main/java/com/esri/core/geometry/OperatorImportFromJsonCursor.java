@@ -27,12 +27,12 @@ package com.esri.core.geometry;
 import com.esri.core.geometry.MultiVertexGeometryImpl.DirtyFlags;
 import com.esri.core.geometry.VertexDescription.Semantics;
 
-class OperatorImportFromJsonCursor extends MapGeometryCursor {
+public class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	JsonReaderCursor m_inputJsonParsers;
 
 	int m_type;
 
-	int m_index;
+	long m_index;
 
 	public OperatorImportFromJsonCursor(int type, JsonReaderCursor jsonParsers) {
 		m_index = -1;
@@ -44,8 +44,23 @@ class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	}
 
 	@Override
-	public int getGeometryID() {
+	public long getGeometryID() {
 		return m_index;
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return m_inputJsonParsers.getSimpleState();
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_inputJsonParsers.getFeatureID();
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_inputJsonParsers.hasNext();
 	}
 
 	@Override
@@ -319,7 +334,7 @@ class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	}
 
 	private static Geometry importFromJsonMultiPoint(JsonReader parser,
-			AttributeStreamOfDbl as, AttributeStreamOfDbl bs) throws Exception {
+	                                                 AttributeStreamOfDbl as, AttributeStreamOfDbl bs) throws Exception {
 		if (parser.currentToken() != JsonReader.Token.START_ARRAY)
 			throw new GeometryException(
 					"failed to parse multipoint: array of vertices is expected");
@@ -401,7 +416,7 @@ class OperatorImportFromJsonCursor extends MapGeometryCursor {
 	}
 
 	private static Geometry importFromJsonMultiPath(boolean b_polygon,
-			JsonReader parser, AttributeStreamOfDbl as, AttributeStreamOfDbl bs)
+	                                                JsonReader parser, AttributeStreamOfDbl as, AttributeStreamOfDbl bs)
 			throws Exception {
 		if (parser.currentToken() != JsonReader.Token.START_ARRAY)
 			throw new GeometryException(

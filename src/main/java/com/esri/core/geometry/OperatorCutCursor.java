@@ -27,6 +27,7 @@ package com.esri.core.geometry;
 
 import com.esri.core.geometry.OperatorCutLocal.Side;
 import com.esri.core.geometry.VertexDescription.Semantics;
+
 import java.util.ArrayList;
 
 class OperatorCutCursor extends GeometryCursor {
@@ -35,59 +36,77 @@ class OperatorCutCursor extends GeometryCursor {
 	Polyline m_cutter;
 	double m_tolerance;
 	ProgressTracker m_progressTracker;
+	SpatialReference m_spatialReference;
 	int m_cutIndex;
 	ArrayList<MultiPath> m_cuts = null;
+	boolean m_bFirstCall = false;
 
-	OperatorCutCursor(boolean bConsiderTouch, Geometry cuttee, Polyline cutter,
-			SpatialReference spatialReference, ProgressTracker progressTracker) {
-		if (cuttee == null || cutter == null)
-			throw new GeometryException("invalid argument");
+	OperatorCutCursor(boolean bConsiderTouch,
+	                  GeometryCursor cutteeCursor,
+	                  Polyline cutter,
+	                  SpatialReference spatialReference,
+	                  ProgressTracker progressTracker) {
 
 		m_bConsiderTouch = bConsiderTouch;
-		m_cuttee = cuttee;
+		m_inputGeoms = cutteeCursor;
 		m_cutter = cutter;
-		Envelope2D e = InternalUtils.getMergedExtent(cuttee,  cutter);
-		m_tolerance = InternalUtils.calculateToleranceFromGeometry(spatialReference, e, true);
+		m_spatialReference = spatialReference;
 		m_cutIndex = -1;
 		m_progressTracker = progressTracker;
+		m_bFirstCall = true;
 	}
 
 	@Override
-	public int getGeometryID() {
-		return 0;
+	public boolean hasNext() {
+		return m_inputGeoms != null && (m_inputGeoms.hasNext() || (m_bFirstCall || m_cutIndex + 1 < m_cuts.size()));
+	}
+
+	private boolean hasNextRes() {
+		return m_bFirstCall || m_cutIndex + 1 < m_cuts.size();
 	}
 
 	@Override
 	public Geometry next() {
-		generateCuts_();
-		if (++m_cutIndex < m_cuts.size()) {
-			return (Geometry)m_cuts.get(m_cutIndex);
+		if (m_bFirstCall || (m_inputGeoms != null && m_inputGeoms.hasNext() && !(m_cutIndex + 1 < m_cuts.size()))) {
+			m_cuttee = m_inputGeoms.next();
+			Envelope2D e = InternalUtils.getMergedExtent(m_cuttee, m_cutter);
+			m_tolerance = InternalUtils.calculateToleranceFromGeometry(m_spatialReference, e, true);
+			m_bFirstCall = true;
+			m_cutIndex = -1;
 		}
-		
+
+		if (hasNextRes()) {
+			m_bFirstCall = false;
+			generateCuts_();
+			if (++m_cutIndex < m_cuts.size()) {
+				return m_cuts.get(m_cutIndex);
+			}
+		}
+
 		return null;
 	}
 
 	private void generateCuts_() {
 		if (m_cuts != null)
 			return;
-		
-		m_cuts = new ArrayList<MultiPath>();
-		
+
+		m_cuts = new ArrayList<>();
+
 		Geometry.Type type = m_cuttee.getType();
 		switch (type.value()) {
-		case Geometry.GeometryType.Polyline:
-			generate_polyline_cuts_();
-			break;
+			case Geometry.GeometryType.Polyline:
+				generate_polyline_cuts_();
+				break;
 
-		case Geometry.GeometryType.Polygon:
-			generate_polygon_cuts_();
-			break;
+			case Geometry.GeometryType.Polygon:
+				generate_polygon_cuts_();
+				break;
 
-		default:
-			break; // warning fix
+			default:
+				break; // warning fix
 		}
 	}
-	
+
 	private void generate_polyline_cuts_() {
 		MultiPath left = new Polyline();
 		MultiPath right = new Polyline();

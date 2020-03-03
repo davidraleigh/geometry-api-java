@@ -25,37 +25,51 @@
 package com.esri.core.geometry;
 
 import com.esri.core.geometry.VertexDescription.Semantics;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
-	GeometryCursor m_inputGeometryCursor;
-	int m_exportFlags;
-	int m_index;
-	ByteBuffer m_shapeBuffer;
+public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
+	private GeometryCursor m_geometryCursor;
+	private int m_exportFlags;
+	private ByteBuffer m_shapeBuffer;
+	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
 
-	public OperatorExportToESRIShapeCursor(int exportFlags,
-			GeometryCursor geometryCursor) {
-		m_index = -1;
+	public OperatorExportToESRIShapeCursor(int exportFlags, GeometryCursor geometryCursor) {
 		if (geometryCursor == null)
 			throw new GeometryException("invalid argument");
 
 		m_exportFlags = exportFlags;
-		m_inputGeometryCursor = geometryCursor;
+		m_geometryCursor = geometryCursor;
 		m_shapeBuffer = null;
 	}
 
 	@Override
-	public int getByteBufferID() {
-		return m_index;
+	public long getByteBufferID() {
+		return m_geometryCursor.getGeometryID();
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return simpleStateEnum;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_geometryCursor.getFeatureID();
+	}
+
+	@Override
+	public boolean hasNext() {
+		return m_geometryCursor != null && m_geometryCursor.hasNext();
 	}
 
 	@Override
 	public ByteBuffer next() {
-		Geometry geometry = m_inputGeometryCursor.next();
-		if (geometry != null) {
-			m_index = m_inputGeometryCursor.getGeometryID();
-
+		Geometry geometry;
+		if (hasNext()) {
+			geometry = m_geometryCursor.next();
+			simpleStateEnum = geometry.getSimpleState();
 			int size = exportToESRIShape(m_exportFlags, geometry, null);
 			if (m_shapeBuffer == null || size > m_shapeBuffer.capacity())
 				m_shapeBuffer = ByteBuffer.allocate(size).order(
@@ -67,7 +81,7 @@ class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	static int exportToESRIShape(int exportFlags, Geometry geometry,
-			ByteBuffer shapeBuffer) {
+	                             ByteBuffer shapeBuffer) {
 		if (geometry == null) {
 			if (shapeBuffer != null)
 				shapeBuffer.putInt(0, ShapeType.ShapeNull);
@@ -77,30 +91,30 @@ class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 
 		int type = geometry.getType().value();
 		switch (type) {
-		case Geometry.GeometryType.Polygon:
-			return exportMultiPathToESRIShape(true, exportFlags,
-					(MultiPath) geometry, shapeBuffer);
-		case Geometry.GeometryType.Polyline:
-			return exportMultiPathToESRIShape(false, exportFlags,
-					(MultiPath) geometry, shapeBuffer);
-		case Geometry.GeometryType.MultiPoint:
-			return exportMultiPointToESRIShape(exportFlags,
-					(MultiPoint) geometry, shapeBuffer);
-		case Geometry.GeometryType.Point:
-			return exportPointToESRIShape(exportFlags, (Point) geometry,
-					shapeBuffer);
-		case Geometry.GeometryType.Envelope:
-			return exportEnvelopeToESRIShape(exportFlags, (Envelope) geometry,
-					shapeBuffer);
-		default: {
-			throw GeometryException.GeometryInternalError();
-			// return -1;
-		}
+			case Geometry.GeometryType.Polygon:
+				return exportMultiPathToESRIShape(true, exportFlags,
+						(MultiPath) geometry, shapeBuffer);
+			case Geometry.GeometryType.Polyline:
+				return exportMultiPathToESRIShape(false, exportFlags,
+						(MultiPath) geometry, shapeBuffer);
+			case Geometry.GeometryType.MultiPoint:
+				return exportMultiPointToESRIShape(exportFlags,
+						(MultiPoint) geometry, shapeBuffer);
+			case Geometry.GeometryType.Point:
+				return exportPointToESRIShape(exportFlags, (Point) geometry,
+						shapeBuffer);
+			case Geometry.GeometryType.Envelope:
+				return exportEnvelopeToESRIShape(exportFlags, (Envelope) geometry,
+						shapeBuffer);
+			default: {
+				throw GeometryException.GeometryInternalError();
+				// return -1;
+			}
 		}
 	}
 
 	private static int exportEnvelopeToESRIShape(int exportFlags,
-			Envelope envelope, ByteBuffer shapeBuffer) {
+	                                             Envelope envelope, ByteBuffer shapeBuffer) {
 		boolean bExportZs = envelope.hasAttribute(Semantics.Z)
 				&& (exportFlags & ShapeExportFlags.ShapeExportStripZs) == 0;
 		boolean bExportMs = envelope.hasAttribute(Semantics.M)
@@ -304,7 +318,7 @@ class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	private static int exportPointToESRIShape(int exportFlags, Point point,
-			ByteBuffer shapeBuffer) {
+	                                          ByteBuffer shapeBuffer) {
 		boolean bExportZ = point.hasAttribute(Semantics.Z)
 				&& (exportFlags & ShapeExportFlags.ShapeExportStripZs) == 0;
 		boolean bExportM = point.hasAttribute(Semantics.M)
@@ -402,7 +416,7 @@ class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	private static int exportMultiPointToESRIShape(int exportFlags,
-			MultiPoint multipoint, ByteBuffer shapeBuffer) {
+	                                               MultiPoint multipoint, ByteBuffer shapeBuffer) {
 		MultiPointImpl multipointImpl = (MultiPointImpl) multipoint._getImpl();
 		boolean bExportZs = multipointImpl.hasAttribute(Semantics.Z)
 				&& (exportFlags & ShapeExportFlags.ShapeExportStripZs) == 0;
@@ -598,7 +612,7 @@ class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	private static int exportMultiPathToESRIShape(boolean bPolygon,
-			int exportFlags, MultiPath multipath, ByteBuffer shapeBuffer) {
+	                                              int exportFlags, MultiPath multipath, ByteBuffer shapeBuffer) {
 		MultiPathImpl multipathImpl = (MultiPathImpl) multipath._getImpl();
 
 		boolean bExportZs = multipathImpl.hasAttribute(Semantics.Z)

@@ -23,8 +23,8 @@
  */
 package com.esri.core.geometry;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A simple GeometryCursor implementation that wraps a single Geometry or
@@ -32,42 +32,74 @@ import java.util.List;
  */
 public class SimpleGeometryCursor extends GeometryCursor {
 
-	Geometry m_geom;
-	List<Geometry> m_geomArray;
+	private long m_index = -1;
+	private String m_currentFeatureId = "";
+	private SimpleStateEnum m_simpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private MapGeometryCursor m_mapGeometryCursor = null;
+	private ArrayDeque<Geometry> m_geometryDeque = null;
 
-	int m_index;
-	int m_count;
+	private long m_current_id = -1;
 
 	public SimpleGeometryCursor(Geometry geom) {
-		m_geom = geom;
-		m_index = -1;
-		m_count = 1;
+		m_geometryDeque = new ArrayDeque<>(1);
+		m_geometryDeque.add(geom);
 	}
 
 	public SimpleGeometryCursor(Geometry[] geoms) {
-		m_geomArray = Arrays.asList(geoms);
-		m_index = -1;
-		m_count = geoms.length;
+		m_geometryDeque = Arrays.stream(geoms).collect(Collectors.toCollection(ArrayDeque::new));
 	}
 
+	@Deprecated
 	public SimpleGeometryCursor(List<Geometry> geoms) {
-		m_geomArray = geoms;
-		m_index = -1;
-		m_count = geoms.size();
+		m_geometryDeque = new ArrayDeque<>(geoms);
+	}
+
+	public SimpleGeometryCursor(ArrayDeque<Geometry> geoms) {
+		m_geometryDeque = geoms;
+	}
+
+	public SimpleGeometryCursor(MapGeometryCursor mapGeometryCursor) {
+		m_mapGeometryCursor = mapGeometryCursor;
 	}
 
 	@Override
-	public int getGeometryID() {
-		return m_index;
+	public long getGeometryID() {
+		return m_current_id;
+	}
+
+	@Override
+	public String getFeatureID() {
+		return m_currentFeatureId;
+	}
+
+	@Override
+	public SimpleStateEnum getSimpleState() {
+		return m_simpleState;
+	}
+
+	@Override
+	public boolean hasNext() {
+		return (m_geometryDeque != null && m_geometryDeque.size() > 0) || (m_mapGeometryCursor != null && m_mapGeometryCursor.hasNext());
 	}
 
 	@Override
 	public Geometry next() {
-		if (m_index < m_count - 1) {
-			m_index++;
-			return m_geom != null ? m_geom : m_geomArray.get(m_index);
+		m_index++;
+		Geometry geometry = null;
+		if (m_geometryDeque != null && !m_geometryDeque.isEmpty()) {
+			geometry = m_geometryDeque.pop();
+
+			// TODO get id off of geometry if exists
+			m_current_id = m_index;
+			m_simpleState = geometry.getSimpleState();
+		} else if (m_mapGeometryCursor != null && m_mapGeometryCursor.hasNext()) {
+			geometry = m_mapGeometryCursor.next().m_geometry;
+
+			// TODO get id off of geometry if exists
+			m_current_id = m_mapGeometryCursor.getGeometryID();
+			m_simpleState = m_mapGeometryCursor.getSimpleState();
 		}
 
-		return null;
+		return geometry;
 	}
 }

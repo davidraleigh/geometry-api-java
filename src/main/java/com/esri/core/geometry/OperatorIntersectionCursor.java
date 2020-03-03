@@ -24,28 +24,25 @@
 
 package com.esri.core.geometry;
 
-import java.util.ArrayList;
-
-class OperatorIntersectionCursor extends GeometryCursor {
-
-	GeometryCursor m_inputGeoms;
+// TODO test this
+public class OperatorIntersectionCursor extends GeometryCursor {
 	GeometryCursor m_smallCursor;
 	ProgressTracker m_progress_tracker;
 	SpatialReference m_spatial_reference;
 	Geometry m_geomIntersector;
 	Geometry m_geomIntersectorEmptyGeom;// holds empty geometry of intersector
-										// type.
+	// type.
 	int m_geomIntersectorType;
 	int m_currentGeomType;
-	int m_index;
 	int m_dimensionMask;
 	boolean m_bEmpty;
 
 	OperatorIntersectionCursor(GeometryCursor inputGeoms,
-			GeometryCursor geomIntersector, SpatialReference sr,
-			ProgressTracker progress_tracker, int dimensionMask) {
+	                           GeometryCursor geomIntersector,
+	                           SpatialReference sr,
+	                           ProgressTracker progress_tracker,
+	                           int dimensionMask) {
 		m_bEmpty = geomIntersector == null;
-		m_index = -1;
 		m_inputGeoms = inputGeoms;
 		m_spatial_reference = sr;
 		m_geomIntersector = geomIntersector.next();
@@ -56,19 +53,19 @@ class OperatorIntersectionCursor extends GeometryCursor {
 		if (m_dimensionMask != -1
 				&& (m_dimensionMask <= 0 || m_dimensionMask > 7))
 			throw new IllegalArgumentException("bad dimension mask");// dimension
-																		// mask
-																		// can
-																		// be
-																		// -1,
-																		// for
-																		// the
-																		// default
-																		// behavior,
-																		// or a
-																		// value
-																		// between
-																		// 1 and
-																		// 7.
+		// mask
+		// can
+		// be
+		// -1,
+		// for
+		// the
+		// default
+		// behavior,
+		// or a
+		// value
+		// between
+		// 1 and
+		// 7.
 	}
 
 	@Override
@@ -77,7 +74,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			return null;
 
 		Geometry geom;
-		if (m_smallCursor != null) {// when dimension mask is used, we produce a
+		if (m_smallCursor != null && m_smallCursor.hasNext()) {// when dimension mask is used, we produce a
 			geom = m_smallCursor.next();
 			if (geom != null)
 				return geom;
@@ -85,8 +82,8 @@ class OperatorIntersectionCursor extends GeometryCursor {
 				m_smallCursor = null;// done with the small cursor
 		}
 
-		while ((geom = m_inputGeoms.next()) != null) {
-			m_index = m_inputGeoms.getGeometryID();
+		if (m_inputGeoms.hasNext()) {
+			geom = m_inputGeoms.next();
 			if (m_dimensionMask == -1) {
 				Geometry resGeom = intersect(geom);
 				assert (resGeom != null);
@@ -99,11 +96,6 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			}
 		}
 		return null;
-	}
-
-	@Override
-	public int getGeometryID() {
-		return m_index;
 	}
 
 	Geometry intersect(Geometry input_geom) {
@@ -139,7 +131,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 	// Parses the input vector to ensure the out result contains only geometries
 	// as indicated with the dimensionMask
 	GeometryCursor prepareVector_(VertexDescription descr, int dimensionMask,
-			Geometry[] res_vec) {
+	                              Geometry[] res_vec) {
 		int inext = 0;
 		if ((dimensionMask & 1) != 0) {
 			if (res_vec[0] == null)
@@ -167,7 +159,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			for (int i = inext; i < res_vec.length - 1; i++)
 				res_vec[i] = res_vec[i + 1];
 		}
-		
+
 		if (inext != 3) {
 			Geometry[] r = new Geometry[inext];
 			for (int i = 0; i < inext; i++)
@@ -196,7 +188,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 
 		// Preprocess geometries to be clipped to the extent of intersection to
 		// get rid of extra segments.
-		
+
 		Envelope2D env = new Envelope2D();
 		m_geomIntersector.queryEnvelope2D(env);
 		env.inflate(2 * t, 2 * t);
@@ -255,7 +247,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			input_geom.queryEnvelope2D(env2D1);
 			Envelope2D env2D2 = new Envelope2D();
 			m_geomIntersector.queryEnvelope2D(env2D2);
-                        env2D2.inflate(2.0 * tolerance, 2.0 * tolerance);
+			env2D2.inflate(2.0 * tolerance, 2.0 * tolerance);
 			bResultIsEmpty = !env2D1.isIntersecting(env2D2);
 		}
 
@@ -266,30 +258,30 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			if (res == OperatorInternalRelationUtils.Relation.Disjoint) {// disjoint
 				bResultIsEmpty = true;
 			} else if ((res & OperatorInternalRelationUtils.Relation.Within) != 0) {// intersector
-																					// is
-																					// within
-																					// the
-																					// input_geom
-																					// TODO:
-																					// assign
-																					// input_geom
-																					// attributes
-																					// first
+				// is
+				// within
+				// the
+				// input_geom
+				// TODO:
+				// assign
+				// input_geom
+				// attributes
+				// first
 				return m_geomIntersector;
 			} else if ((res & OperatorInternalRelationUtils.Relation.Contains) != 0) {// intersector
-																						// contains
-																						// input_geom
+				// contains
+				// input_geom
 				return input_geom;
 			}
 		}
 
 		if (bResultIsEmpty) {// When one geometry or both are empty, we need to
-								// return an empty geometry.
-								// Here we do that end also ensure the type is
-								// correct.
-								// That is the lower dimension need to be
-								// returned. Also, for Point vs Multi_point, an
-								// empty Point need to be returned.
+			// return an empty geometry.
+			// Here we do that end also ensure the type is
+			// correct.
+			// That is the lower dimension need to be
+			// returned. Also, for Point vs Multi_point, an
+			// empty Point need to be returned.
 			int dim1 = Geometry.getDimensionFromType(gtInput);
 			int dim2 = Geometry.getDimensionFromType(m_geomIntersectorType);
 			if (dim1 < dim2)
@@ -299,17 +291,17 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			else if (dim1 == 0) {
 				if (gtInput == Geometry.GeometryType.MultiPoint
 						&& m_geomIntersectorType == Geometry.GeometryType.Point) {// point
-																					// vs
-																					// Multi_point
-																					// need
-																					// special
-																					// treatment
-																					// to
-																					// ensure
-																					// Point
-																					// is
-																					// returned
-																					// always.
+					// vs
+					// Multi_point
+					// need
+					// special
+					// treatment
+					// to
+					// ensure
+					// Point
+					// is
+					// returned
+					// always.
 					return returnEmptyIntersector_();
 				} else
 					// Both input and intersector have same gtype, or input is
@@ -344,7 +336,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 		if ((gtInput == Geometry.GeometryType.Envelope && Geometry
 				.getDimensionFromType(m_geomIntersectorType) == 0)
 				|| (m_geomIntersectorType == Geometry.GeometryType.Envelope && Geometry
-						.getDimensionFromType(gtInput) == 0)) {
+				.getDimensionFromType(gtInput) == 0)) {
 			Envelope env = gtInput == Geometry.GeometryType.Envelope ? (Envelope) input_geom
 					: (Envelope) m_geomIntersector;
 			Geometry other = gtInput == Geometry.GeometryType.Envelope ? m_geomIntersector
@@ -357,8 +349,8 @@ class OperatorIntersectionCursor extends GeometryCursor {
 		if ((Geometry.getDimensionFromType(gtInput) == 0 && Geometry
 				.getDimensionFromType(m_geomIntersectorType) > 0)
 				|| (Geometry.getDimensionFromType(gtInput) > 0 && Geometry
-						.getDimensionFromType(m_geomIntersectorType) == 0)) {// multipoint
-																				// intersection
+				.getDimensionFromType(m_geomIntersectorType) == 0)) {// multipoint
+			// intersection
 			double tolerance1 = InternalUtils.calculateToleranceFromGeometry(
 					m_spatial_reference, input_geom, false);
 			if (gtInput == Geometry.GeometryType.MultiPoint)
@@ -406,7 +398,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			polygonImpl.queryEnvelope2D(clipEnvelope);
 			Envelope2D env1 = new Envelope2D();
 			polylineImpl.queryEnvelope2D(env1);
-                        env1.inflate(2.0 * tolerance, 2.0 * tolerance);
+			env1.inflate(2.0 * tolerance, 2.0 * tolerance);
 			clipEnvelope.intersect(env1);
 			assert (!clipEnvelope.isEmpty());
 		}
@@ -458,7 +450,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 
 			polygon = (Polygon) clippedPolygon;
 			polygonImpl = (MultiPathImpl) polygon._getImpl();
-            accel = polygonImpl._getAccelerators();//update accelerators
+			accel = polygonImpl._getAccelerators();//update accelerators
 		}
 
 		if (unresolvedSegments < 0) {
@@ -577,7 +569,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 
 					if (intersections.size() > 0) {// intersections detected.
 						intersections.sort(0, intersections.size()); // std::sort(intersections.begin(),
-																		// intersections.end());
+						// intersections.end());
 
 						double t0 = 0;
 						intersections.add(1.0);
@@ -617,38 +609,38 @@ class OperatorIntersectionCursor extends GeometryCursor {
 								status = analyseClipSegment_(polygon, resSeg,
 										tolerance);
 								switch (status) {
-								case 1:
-									if (!bWholeSegment) {
-										resultPolylineImpl.addSegment(resSeg,
-												state == stateNewPath);
-										state = stateAddSegment;
-									} else {
-										if (state < stateManySegments) {
-											start_index = polylineIter
-													.getStartPointIndex()
-													- polylineImpl
-															.getPathStart(polylinePathIndex);
-											inCount = 1;
+									case 1:
+										if (!bWholeSegment) {
+											resultPolylineImpl.addSegment(resSeg,
+													state == stateNewPath);
+											state = stateAddSegment;
+										} else {
+											if (state < stateManySegments) {
+												start_index = polylineIter
+														.getStartPointIndex()
+														- polylineImpl
+														.getPathStart(polylinePathIndex);
+												inCount = 1;
 
-											if (state == stateNewPath)
-												state = stateManySegmentsNewPath;
-											else {
-												assert (state == stateAddSegment);
-												state = stateManySegmentsContinuePath;
-											}
-										} else
-											inCount++;
-									}
+												if (state == stateNewPath)
+													state = stateManySegmentsNewPath;
+												else {
+													assert (state == stateAddSegment);
+													state = stateManySegmentsContinuePath;
+												}
+											} else
+												inCount++;
+										}
 
-									break;
-								case 0:
-									state = stateNewPath;
-									start_index = -1;
-									inCount = 0;
-									break;
-								default:
-									return null;// may happen if a segment
-												// coincides with the border.
+										break;
+									case 0:
+										state = stateNewPath;
+										start_index = -1;
+										inCount = 0;
+										break;
+									default:
+										return null;// may happen if a segment
+									// coincides with the border.
 								}
 							}
 
@@ -657,18 +649,18 @@ class OperatorIntersectionCursor extends GeometryCursor {
 					} else {
 						clipStatus = analyseClipSegment_(polygon,
 								polylineSeg.getStartXY(), tolerance);// simple
-																		// case
-																		// no
-																		// intersection.
-																		// Both
-																		// points
-																		// must
-																		// be
-																		// inside.
+						// case
+						// no
+						// intersection.
+						// Both
+						// points
+						// must
+						// be
+						// inside.
 						if (clipStatus < 0) {
 							assert (clipStatus >= 0);
 							return null;// something goes wrong, resort to
-										// planesweep
+							// planesweep
 						}
 
 						assert (analyseClipSegment_(polygon,
@@ -678,7 +670,7 @@ class OperatorIntersectionCursor extends GeometryCursor {
 								assert (inCount == 0);
 								start_index = polylineIter.getStartPointIndex()
 										- polylineImpl
-												.getPathStart(polylinePathIndex);
+										.getPathStart(polylinePathIndex);
 								if (state == stateNewPath)
 									state = stateManySegmentsNewPath;
 								else {
@@ -712,12 +704,12 @@ class OperatorIntersectionCursor extends GeometryCursor {
 							state = stateManySegmentsNewPath;
 							start_index = polylineIter.getStartPointIndex()
 									- polylineImpl
-											.getPathStart(polylinePathIndex);
+									.getPathStart(polylinePathIndex);
 						} else if (state == stateAddSegment) {
 							state = stateManySegmentsContinuePath;
 							start_index = polylineIter.getStartPointIndex()
 									- polylineImpl
-											.getPathStart(polylinePathIndex);
+									.getPathStart(polylinePathIndex);
 						} else
 							assert (state >= stateManySegments);
 
@@ -753,8 +745,8 @@ class OperatorIntersectionCursor extends GeometryCursor {
 			// polygon, m_spatial_reference);
 			assert (false);// if happens
 			return -1;// something went wrong. One point is inside, the other is
-						// outside. Should not happen. We'll resort to
-						// planesweep.
+			// outside. Should not happen. We'll resort to
+			// planesweep.
 		}
 		if (v_1 == 0 || v_2 == 0)
 			return 0;
