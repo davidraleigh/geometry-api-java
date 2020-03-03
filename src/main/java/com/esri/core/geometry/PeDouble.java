@@ -25,13 +25,13 @@
 package com.esri.core.geometry;
 
 public final class PeDouble {
-	double val;
+	public double val;
 
-	PeDouble() {
+	public PeDouble() {
 		val = 0.0;
 	}
 
-	PeDouble(double v) {
+	public PeDouble(double v) {
 		val = v;
 	}
 }
