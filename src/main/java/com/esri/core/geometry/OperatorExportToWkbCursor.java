@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 
 public class OperatorExportToWkbCursor extends ByteBufferCursor {
 	private GeometryCursor m_geometryCursor;
-	private int m_exportFlags;
+	int m_exportFlags;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
 
 	public OperatorExportToWkbCursor(int exportFlags, GeometryCursor geometryCursor) {

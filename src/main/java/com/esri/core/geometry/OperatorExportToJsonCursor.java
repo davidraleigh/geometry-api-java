@@ -49,7 +49,7 @@ public class OperatorExportToJsonCursor extends StringCursor {
 	}
 
 	@Override
-	public long getID() {
+	public int getID() {
 		return m_geometryCursor.getGeometryID();
 	}
 

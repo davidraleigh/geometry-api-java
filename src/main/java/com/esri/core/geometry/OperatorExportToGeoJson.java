@@ -25,7 +25,7 @@ package com.esri.core.geometry;
 import com.esri.core.geometry.Operator.Type;
 
 /**
- *Export to GeoJson format.
+ * Export to GeoJson format.
  */
 public abstract class OperatorExportToGeoJson extends Operator {
 	@Override
@@ -35,31 +35,35 @@ public abstract class OperatorExportToGeoJson extends Operator {
 
 	/**
 	 * Performs the ExportToGeoJson operation
+	 *
 	 * @param spatialReference The SpatialReference of the Geometry. Will be written as "crs":null if the spatialReference is null.
-	 * @param geometryCursor The cursor of geometries to write as GeoJson.
+	 * @param geometryCursor   The cursor of geometries to write as GeoJson.
 	 * @return Returns a JsonCursor.
 	 */
-	public abstract JsonCursor execute(SpatialReference spatialReference, GeometryCursor geometryCursor);
+	public abstract StringCursor execute(SpatialReference spatialReference, GeometryCursor geometryCursor);
 
 	/**
 	 * Performs the ExportToGeoJson operation
+	 *
 	 * @param spatialReference The SpatialReference of the Geometry. Will be written as "crs":null if the spatialReference is null.
-	 * @param geometry The Geometry to write as GeoJson.
+	 * @param geometry         The Geometry to write as GeoJson.
 	 * @return Returns a string in GeoJson format.
 	 */
 	public abstract String execute(SpatialReference spatialReference, Geometry geometry);
 
 	/**
 	 * Performs the ExportToGeoJson operation
-	 * @param exportFlags Use the {@link GeoJsonExportFlags} interface.
+	 *
+	 * @param exportFlags      Use the {@link GeoJsonExportFlags} interface.
 	 * @param spatialReference The SpatialReference of the Geometry. Will be written as "crs":null if the spatialReference is null.
-	 * @param geometry The Geometry to write as GeoJson.
+	 * @param geometry         The Geometry to write as GeoJson.
 	 * @return Returns a string in GeoJson format.
 	 */
 	public abstract String execute(int exportFlags, SpatialReference spatialReference, Geometry geometry);
 
 	/**
 	 * Performs the ExportToGeoJson operation. Will not write out a spatial reference or crs tag. Assumes the geometry is in wgs84.
+	 *
 	 * @param geometry The Geometry to write as GeoJson.
 	 * @return Returns a string in GeoJson format.
 	 */

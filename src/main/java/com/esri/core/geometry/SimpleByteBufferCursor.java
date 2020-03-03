@@ -31,11 +31,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SimpleByteBufferCursor extends ByteBufferCursor {
-	private ArrayDeque<Long> m_ids;
+	private ArrayDeque<Integer> m_ids;
 	private ArrayDeque<ByteBuffer> m_byteBufferDeque;
 	private ArrayDeque<SimpleStateEnum> m_simpleStates;
 	private ArrayDeque<String> m_featureIDs;
-	private long m_current_id = -1;
+	private int m_current_id = -1;
 	private SimpleStateEnum m_currentSimpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 	private String m_currentFeatureID = "";
 
@@ -45,14 +45,14 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 		m_byteBufferDeque.add(byteBuffer);
 	}
 
-	public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id) {
+	public SimpleByteBufferCursor(ByteBuffer byteBuffer, int id) {
 		m_byteBufferDeque = new ArrayDeque<>(1);
 		m_byteBufferDeque.add(byteBuffer);
 		m_ids = new ArrayDeque<>(1);
 		m_ids.push(id);
 	}
 
-	public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id, SimpleStateEnum simpleState) {
+	public SimpleByteBufferCursor(ByteBuffer byteBuffer, int id, SimpleStateEnum simpleState) {
 		m_byteBufferDeque = new ArrayDeque<>(1);
 		m_byteBufferDeque.add(byteBuffer);
 		m_ids = new ArrayDeque<>(1);
@@ -61,7 +61,7 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 		m_simpleStates.push(simpleState);
 	}
 
-	public SimpleByteBufferCursor(ByteBuffer byteBuffer, long id, SimpleStateEnum simpleState, String featureID) {
+	public SimpleByteBufferCursor(ByteBuffer byteBuffer, int id, SimpleStateEnum simpleState, String featureID) {
 		m_byteBufferDeque = new ArrayDeque<>(1);
 		m_byteBufferDeque.add(byteBuffer);
 		m_ids = new ArrayDeque<>(1);
@@ -82,13 +82,13 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 		m_byteBufferDeque = new ArrayDeque<>(byteBufferArray);
 	}
 
-	public SimpleByteBufferCursor(ArrayDeque<ByteBuffer> byteBufferArrayDeque, ArrayDeque<Long> ids) {
+	public SimpleByteBufferCursor(ArrayDeque<ByteBuffer> byteBufferArrayDeque, ArrayDeque<Integer> ids) {
 		m_byteBufferDeque = byteBufferArrayDeque;
 		m_ids = ids;
 	}
 
 	public SimpleByteBufferCursor(ArrayDeque<ByteBuffer> arrayDeque,
-	                              ArrayDeque<Long> ids,
+	                              ArrayDeque<Integer> ids,
 	                              ArrayDeque<SimpleStateEnum> simpleStates,
 	                              ArrayDeque<String> featureIDs) {
 		if ((arrayDeque.size() & ids.size() & simpleStates.size() & featureIDs.size()) != arrayDeque.size()) {

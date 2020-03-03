@@ -32,7 +32,7 @@ public class OperatorImportFromJsonCursor extends MapGeometryCursor {
 
 	int m_type;
 
-	long m_index;
+	int m_index;
 
 	public OperatorImportFromJsonCursor(int type, JsonReaderCursor jsonParsers) {
 		m_index = -1;
