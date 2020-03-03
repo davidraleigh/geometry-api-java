@@ -29,7 +29,7 @@ public final class MathUtils {
 	 * The implementation of the Kahan summation algorithm. Use to get better
 	 * precision when adding a lot of values.
 	 */
-	static final class KahanSummator {
+	public static final class KahanSummator {
 		private double sum; // the accumulated sum
 		private double compensation;
 		private double startValue; // the Base (the class returns sum +
@@ -39,7 +39,7 @@ public final class MathUtils {
 		 * initialize to the given start value. \param startValue_ The value to
 		 * be added to the accumulated sum.
 		 */
-		KahanSummator(double startValue_) {
+		public KahanSummator(double startValue_) {
 			startValue = startValue_;
 			reset();
 		}
@@ -48,7 +48,7 @@ public final class MathUtils {
 		 * Resets the accumulated sum to zero. The getResult() returns
 		 * startValue_ after this call.
 		 */
-		void reset() {
+		public void reset() {
 			sum = 0;
 			compensation = 0;
 		}
@@ -56,7 +56,7 @@ public final class MathUtils {
 		/**
 		 * add a value.
 		 */
-		void add(double v) {
+		public void add(double v) {
 			double y = v - compensation;
 			double t = sum + y;
 			double h = t - sum;
@@ -67,14 +67,14 @@ public final class MathUtils {
 		/**
 		 * Subtracts a value.
 		 */
-		void sub(double v) {
+		public void sub(double v) {
 			add(-v);
 		}
 
 		/**
 		 * add another summator.
 		 */
-		void add(/* const */KahanSummator v) {
+		public void add(/* const */KahanSummator v) {
 			double y = (v.getResult() + v.compensation) - compensation;
 			double t = sum + y;
 			double h = t - sum;
@@ -85,7 +85,7 @@ public final class MathUtils {
 		/**
 		 * Subtracts another summator.
 		 */
-		void sub(/* const */KahanSummator v) {
+		public void sub(/* const */KahanSummator v) {
 			double y = -(v.getResult() - v.compensation) - compensation;
 			double t = sum + y;
 			double h = t - sum;
@@ -96,26 +96,26 @@ public final class MathUtils {
 		/**
 		 * Returns current value of the sum.
 		 */
-		double getResult() /* const */{
+		public double getResult() /* const */{
 			return startValue + sum;
 		}
 
-		KahanSummator plusEquals(double v) {
+		public KahanSummator plusEquals(double v) {
 			add(v);
 			return this;
 		}
 
-		KahanSummator minusEquals(double v) {
+		public KahanSummator minusEquals(double v) {
 			add(-v);
 			return this;
 		}
 
-		KahanSummator plusEquals(/* const */KahanSummator v) {
+		public KahanSummator plusEquals(/* const */KahanSummator v) {
 			add(v);
 			return this;
 		}
 
-		KahanSummator minusEquals(/* const */KahanSummator v) {
+		public KahanSummator minusEquals(/* const */KahanSummator v) {
 			sub(v);
 			return this;
 		}
@@ -234,5 +234,4 @@ public final class MathUtils {
 		assert (t < 0 || t > 1.0 || (result.x >= start_x && result.x <= end_x) || (result.x <= start_x && result.x >= end_x));
 		assert (t < 0 || t > 1.0 || (result.y >= start_y && result.y <= end_y) || (result.y <= start_y && result.y >= end_y));
 	}
-	
 }
