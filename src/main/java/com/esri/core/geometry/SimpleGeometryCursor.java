@@ -63,20 +63,20 @@ public class SimpleGeometryCursor extends GeometryCursor {
     }
 
     @Override
-    public boolean hasNext() {
-        return (m_geometryDeque != null && m_geometryDeque.size() > 0) || (m_mapGeometryCursor != null && m_mapGeometryCursor.hasNext());
-    }
-
-    @Override
     public long getGeometryID() {
         return m_current_id;
     }
 
     @Override
+    public String getFeatureID() { return m_currentFeatureId; }
+
+    @Override
     public SimpleStateEnum getSimpleState() { return m_simpleState; }
 
     @Override
-    public String getFeatureID() { return m_currentFeatureId; }
+    public boolean hasNext() {
+        return (m_geometryDeque != null && m_geometryDeque.size() > 0) || (m_mapGeometryCursor != null && m_mapGeometryCursor.hasNext());
+    }
 
     @Override
     public Geometry next() {

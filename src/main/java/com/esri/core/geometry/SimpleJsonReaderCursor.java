@@ -43,24 +43,6 @@ public class SimpleJsonReaderCursor extends JsonReaderCursor {
     }
 
     @Override
-    public int getID() {
-        return m_index;
-    }
-
-    @Override
-    public SimpleStateEnum getSimpleState() {
-        return simpleState;
-    }
-
-    @Override
-    public String getFeatureID() { return currentFeatureID ; }
-
-    @Override
-    public boolean hasNext() {
-        return m_jsonDeque.size() > 0;
-    }
-
-    @Override
     public JsonReader next() {
         if (!m_jsonDeque.isEmpty()) {
             m_index++;
@@ -70,4 +52,21 @@ public class SimpleJsonReaderCursor extends JsonReaderCursor {
         return null;
     }
 
+    @Override
+    public int getID() {
+        return m_index;
+    }
+
+    @Override
+    public String getFeatureID() { return currentFeatureID ; }
+
+    @Override
+    public SimpleStateEnum getSimpleState() {
+        return simpleState;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return m_jsonDeque.size() > 0;
+    }
 }

@@ -47,25 +47,6 @@ class SimpleMapGeometryCursor extends MapGeometryCursor {
     }
 
     @Override
-    public long getGeometryID() {
-        return m_index;
-    }
-
-    @Override
-    public SimpleStateEnum getSimpleState() {
-        return m_simpleState;
-    }
-
-    @Override
-    public String getFeatureID() { return m_currentFeatureID; }
-
-
-    @Override
-    public boolean hasNext() {
-        return m_geomDeque.size() > 0;
-    }
-
-    @Override
     public MapGeometry next() {
         if (hasNext()) {
             m_index++;
@@ -75,5 +56,23 @@ class SimpleMapGeometryCursor extends MapGeometryCursor {
         }
 
         return null;
+    }
+
+    @Override
+    public long getGeometryID() {
+        return m_index;
+    }
+
+    @Override
+    public String getFeatureID() { return m_currentFeatureID; }
+
+    @Override
+    public SimpleStateEnum getSimpleState() {
+        return m_simpleState;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return m_geomDeque.size() > 0;
     }
 }

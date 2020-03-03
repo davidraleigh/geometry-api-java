@@ -58,11 +58,11 @@ public abstract class GeometryCursor implements Iterator<Geometry> {
         return true;
     }
 
-    public boolean hasNext() {
-        return m_inputGeoms != null && m_inputGeoms.hasNext();
-    }
+    public String getFeatureID() { return m_inputGeoms.getFeatureID(); }
 
     public SimpleStateEnum getSimpleState() { return m_inputGeoms.getSimpleState(); }
 
-    public String getFeatureID() { return m_inputGeoms.getFeatureID(); }
+    public boolean hasNext() {
+        return m_inputGeoms != null && m_inputGeoms.hasNext();
+    }
 }

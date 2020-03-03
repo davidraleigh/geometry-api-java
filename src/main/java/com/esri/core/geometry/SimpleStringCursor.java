@@ -83,18 +83,18 @@ public class SimpleStringCursor extends StringCursor {
     }
 
     @Override
-    public boolean hasNext() { return m_arrayDeque.size() > 0; }
-
-    @Override
     public long getID() {
         return m_current_id;
     }
 
     @Override
+    public String getFeatureID() { return m_currentFeatureID; }
+
+    @Override
     public SimpleStateEnum getSimpleState() { return m_current_state; }
 
     @Override
-    public String getFeatureID() { return m_currentFeatureID; }
+    public boolean hasNext() { return m_arrayDeque.size() > 0; }
 
     void _incrementInternals() {
         if (m_ids != null && !m_ids.isEmpty()) {

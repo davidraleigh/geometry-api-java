@@ -48,9 +48,9 @@ public abstract class ByteBufferCursor implements Iterator<ByteBuffer> {
      */
     public abstract int getByteBufferID();
 
-    public abstract SimpleStateEnum getSimpleState();
-
     public abstract String getFeatureID();
+
+    public abstract SimpleStateEnum getSimpleState();
 
     public abstract boolean hasNext();
 

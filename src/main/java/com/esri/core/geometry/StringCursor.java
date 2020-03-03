@@ -7,9 +7,9 @@ public abstract class StringCursor implements Iterator<String> {
 
     public abstract long getID();
 
-    public abstract SimpleStateEnum getSimpleState();
-
     public abstract String getFeatureID();
+
+    public abstract SimpleStateEnum getSimpleState();
 
     public abstract boolean hasNext();
 }

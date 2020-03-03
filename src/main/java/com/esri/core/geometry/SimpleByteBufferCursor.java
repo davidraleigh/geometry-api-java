@@ -101,14 +101,12 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
     }
 
     @Override
-    public boolean hasNext() {
-        return m_byteBufferDeque.size() > 0;
-    }
-
-    @Override
     public long getByteBufferID() {
         return m_current_id;
     }
+
+    @Override
+    public String getFeatureID() { return m_currentFeatureID; }
 
     @Override
     public SimpleStateEnum getSimpleState() {
@@ -116,7 +114,9 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
     }
 
     @Override
-    public String getFeatureID() { return m_currentFeatureID; }
+    public boolean hasNext() {
+        return m_byteBufferDeque.size() > 0;
+    }
 
     void _incrementInternals() {
         if (m_ids != null && !m_ids.isEmpty()) {
