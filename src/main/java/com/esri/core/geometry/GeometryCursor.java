@@ -29,7 +29,7 @@ import java.util.Iterator;
  * An abstract Geometry Cursor class.
  */
 public abstract class GeometryCursor implements Iterator<Geometry> {
-	GeometryCursor m_inputGeoms = null;
+	protected GeometryCursor m_inputGeoms = null;
 
 	/**
 	 * Moves the cursor to the next Geometry. Returns null when reached the end.
