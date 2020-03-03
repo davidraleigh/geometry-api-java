@@ -40,7 +40,7 @@ public class OperatorImportFromGeoJsonCursor extends MapGeometryCursor {
 	}
 
 	@Override
-	public long getGeometryID() {
+	public int getGeometryID() {
 		return m_jsonStringCursor.getID();
 	}
 

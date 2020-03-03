@@ -63,7 +63,7 @@ public class SimpleGeometryCursor extends GeometryCursor {
 	}
 
 	@Override
-	public long getGeometryID() {
+	public int getGeometryID() {
 		return m_current_id;
 	}
 
