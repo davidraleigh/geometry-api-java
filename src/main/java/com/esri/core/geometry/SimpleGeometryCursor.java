@@ -32,13 +32,13 @@ import java.util.stream.Collectors;
  */
 public class SimpleGeometryCursor extends GeometryCursor {
 
-	private long m_index = -1;
+	private int m_index = -1;
 	private String m_currentFeatureId = "";
 	private SimpleStateEnum m_simpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 	private MapGeometryCursor m_mapGeometryCursor = null;
 	private ArrayDeque<Geometry> m_geometryDeque = null;
 
-	private long m_current_id = -1;
+	private int m_current_id = -1;
 
 	public SimpleGeometryCursor(Geometry geom) {
 		m_geometryDeque = new ArrayDeque<>(1);

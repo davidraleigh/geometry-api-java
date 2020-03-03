@@ -101,7 +101,7 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 	}
 
 	@Override
-	public long getByteBufferID() {
+	public int getByteBufferID() {
 		return m_current_id;
 	}
 

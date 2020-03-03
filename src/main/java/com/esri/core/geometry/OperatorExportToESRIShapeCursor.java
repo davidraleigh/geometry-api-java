@@ -45,7 +45,7 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	}
 
 	@Override
-	public long getByteBufferID() {
+	public int getByteBufferID() {
 		return m_geometryCursor.getGeometryID();
 	}
 
