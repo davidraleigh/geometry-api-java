@@ -26,7 +26,7 @@ package com.esri.core.geometry;
 
 import java.nio.ByteBuffer;
 
-class SimpleByteBufferCursor extends ByteBufferCursor {
+public class SimpleByteBufferCursor extends ByteBufferCursor {
 
 	ByteBuffer m_byteBuffer;
 	int m_index;

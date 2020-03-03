@@ -24,7 +24,7 @@
 
 package com.esri.core.geometry;
 
-final class Wkt {
+public final class Wkt {
 	public static double find_tolerance_from_wkt(String buffer) {
 		double tolerance = -1.0;
 

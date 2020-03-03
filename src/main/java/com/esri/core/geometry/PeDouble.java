@@ -24,7 +24,7 @@
 
 package com.esri.core.geometry;
 
-final class PeDouble {
+public final class PeDouble {
 	double val;
 
 	PeDouble() {
