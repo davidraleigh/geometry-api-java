@@ -30,6 +30,11 @@ import java.nio.ByteOrder;
 class OperatorExportToWkbLocal extends OperatorExportToWkb {
 
 	@Override
+	public ByteBufferCursor execute(int exportFlags, GeometryCursor geometryCursor) {
+		return new OperatorExportToWkbCursor(exportFlags, geometryCursor);
+	}
+
+	@Override
 	public ByteBuffer execute(int exportFlags, Geometry geometry,
 	                          ProgressTracker progressTracker) {
 		int size = exportToWKB(exportFlags, geometry, null);

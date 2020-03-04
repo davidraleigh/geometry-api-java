@@ -30,6 +30,8 @@ public abstract class OperatorImportFromGeoJson extends Operator {
 		return Type.ImportFromGeoJson;
 	}
 
+	public abstract MapGeometryCursor execute(int import_flags, StringCursor stringCursor, ProgressTracker progressTracker);
+
 	/**
 	 * Performs the ImportFromGeoJson operation.
 	 *

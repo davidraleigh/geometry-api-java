@@ -38,6 +38,15 @@ public abstract class OperatorExportToWkb extends Operator {
 	}
 
 	/**
+	 * Performs the ExportToWKB operation on cursor of geometries
+	 *
+	 * @param exportFlags    This should probably be removed
+	 * @param geometryCursor
+	 * @return
+	 */
+	public abstract ByteBufferCursor execute(int exportFlags, GeometryCursor geometryCursor);
+
+	/**
 	 * Performs the ExportToWKB operation.
 	 * @param exportFlags Use the {@link WkbExportFlags} interface.
 	 * @param geometry The Geometry being exported.

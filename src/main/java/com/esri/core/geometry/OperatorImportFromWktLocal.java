@@ -27,6 +27,11 @@ import java.util.ArrayList;
 
 class OperatorImportFromWktLocal extends OperatorImportFromWkt {
 	@Override
+	public GeometryCursor execute(int import_flags, SimpleStringCursor wkt_stringCursor, ProgressTracker progress_tracker) {
+		return new OperatorImportFromWktCursor(import_flags, wkt_stringCursor);
+	}
+
+	@Override
 	public Geometry execute(int import_flags, Geometry.Type type,
 			String wkt_string, ProgressTracker progress_tracker) {
 		WktParser wkt_parser = new WktParser(wkt_string);
