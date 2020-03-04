@@ -831,4 +831,20 @@ public final class AttributeStreamOfDbl extends AttributeStreamBase {
 	public void sort(int start, int end) {
 		Arrays.sort(m_buffer, start, end);
 	}
+
+	/**
+	 * WARNING, this is like move semantics in C++, that means outside world could mess up a polygon if they still have
+	 * a pointer to array. Only used internally for functions where array pointer never leaves scope of function
+	 *
+	 * @param src
+	 */
+	public void writeRangeMove(double[] src) {
+		if (src.length == 0)
+			return;
+
+		if (size() < src.length)
+			resize(src.length);
+
+		m_buffer = src;
+	}
 }
