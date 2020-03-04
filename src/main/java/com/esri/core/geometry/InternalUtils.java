@@ -26,7 +26,7 @@ package com.esri.core.geometry;
 
 import java.util.ArrayList;
 
-final class InternalUtils {
+public final class InternalUtils {
 
 	// p0 and p1 have to be on left/right boundary of fullRange2D (since this
 	// fuction can be called recursively, p0 or p1 can also be fullRange2D
@@ -118,7 +118,7 @@ final class InternalUtils {
 		}
 	}
 
-	static double calculateToleranceFromGeometry(SpatialReference sr,
+	public static double calculateToleranceFromGeometry(SpatialReference sr,
 			Envelope2D env2D, boolean bConservative) {
 		double gtolerance = env2D._calculateToleranceFromEnvelope();
 		double stolerance = sr != null ? sr
@@ -134,7 +134,7 @@ final class InternalUtils {
 
     static double adjust_tolerance_for_TE_cracking(double tol) { return Math.sqrt(2.0) * tol; }
 	
-	static double calculateToleranceFromGeometry(SpatialReference sr,
+	public static double calculateToleranceFromGeometry(SpatialReference sr,
 			Geometry geometry, boolean bConservative) {
 		Envelope2D env2D = new Envelope2D();
 		geometry.queryEnvelope2D(env2D);
@@ -534,7 +534,7 @@ final class InternalUtils {
         return intersector;
     }
 
-	static boolean isWeakSimple(MultiVertexGeometry geom, double tol) {
+	public static boolean isWeakSimple(MultiVertexGeometry geom, double tol) {
 		return ((MultiVertexGeometryImpl) geom._getImpl()).getIsSimple(tol) > 0;
 	}
 	

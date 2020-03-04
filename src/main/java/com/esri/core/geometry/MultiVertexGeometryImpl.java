@@ -880,7 +880,7 @@ public abstract class MultiVertexGeometryImpl extends MultiVertexGeometry {
 		return -1;
 	}
 
-	void setIsSimple(int isSimpleRes, double tolerance, boolean ogc_known) {
+	public void setIsSimple(int isSimpleRes, double tolerance, boolean ogc_known) {
 		m_simpleTolerance = tolerance;
 		if (isSimpleRes == GeometryXSimple.Unknown) {
 			_setDirtyFlag(DirtyFlags.DirtyIsKnownSimple, true);
