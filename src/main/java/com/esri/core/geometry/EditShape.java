@@ -597,7 +597,7 @@ public final class EditShape {
 	}
 
 	// Adds a path
-	int addPathFromMultiPath(MultiPath multi_path, int ipath, boolean as_polygon) {
+	public int addPathFromMultiPath(MultiPath multi_path, int ipath, boolean as_polygon) {
 		int newgeom = createGeometry(as_polygon ? Geometry.Type.Polygon
 				: Geometry.Type.Polyline, multi_path.getDescription());
 
@@ -902,7 +902,7 @@ public final class EditShape {
 	}
 
 	// Point count in a geometry
-	int getPointCount(int geom) {
+	public int getPointCount(int geom) {
 		return m_geometry_index_list.getField(geom, 5);
 	}
 
@@ -917,7 +917,7 @@ public final class EditShape {
 	// 0 if no segments have been removed.
 	// When b_remove_last_vertices and the result path is < 3 for polygon or < 2
 	// for polyline, it'll be removed.
-	int filterClosePoints(double tolerance, boolean b_remove_last_vertices, boolean only_polygons) {
+	public int filterClosePoints(double tolerance, boolean b_remove_last_vertices, boolean only_polygons) {
 		int res = 0;
 		for (int geometry = getFirstGeometry(); geometry != -1; geometry = getNextGeometry(geometry)) {
 			int gt = getGeometryType(geometry);
@@ -1245,7 +1245,7 @@ public final class EditShape {
 	}
 
 	// set_xy modifies the vertex and associated segments.
-	void setXY(int vertex, Point2D new_coord) {
+	public void setXY(int vertex, Point2D new_coord) {
 		setXY(vertex, new_coord.x, new_coord.y);
 	}
 
@@ -1275,7 +1275,7 @@ public final class EditShape {
 	}
 
 	// Returns the coordinates of the vertex.
-	void getXY(int vertex, Point2D ptOut) {
+	public void getXY(int vertex, Point2D ptOut) {
 		int vindex = getVertexIndex(vertex);
 		ptOut.setCoords(m_vertices.getXY(vindex));
 	}
@@ -1593,7 +1593,7 @@ public final class EditShape {
 	}
 
 	// Returns True if the path is closed.
-	boolean isClosedPath(int path) {
+	public boolean isClosedPath(int path) {
 		return (getPathFlags_(path) & PathFlags_.closedPath) != 0;
 	}
 

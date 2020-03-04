@@ -27,7 +27,7 @@ package com.esri.core.geometry;
 
 import static com.esri.core.geometry.SizeOf.SIZE_OF_MULTI_PATH_IMPL;
 
-final class MultiPathImpl extends MultiVertexGeometryImpl {
+public final class MultiPathImpl extends MultiVertexGeometryImpl {
 	protected boolean m_bPolygon;
 	protected Point m_moveToPoint;
 	protected double m_cachedLength2D;
@@ -2130,7 +2130,7 @@ final class MultiPathImpl extends MultiVertexGeometryImpl {
 		return polygonCount;
 	}
 
-	protected void _updateOGCFlags() {
+	public void _updateOGCFlags() {
 		if (_hasDirtyFlag(DirtyFlags.DirtyOGCFlags)) {
 			_updateRingAreas2D();
 
@@ -2522,7 +2522,7 @@ final class MultiPathImpl extends MultiVertexGeometryImpl {
 		}
 	}
 
-	void queryPathEnvelope2D(int path_index, Envelope2D envelope) {
+	public void queryPathEnvelope2D(int path_index, Envelope2D envelope) {
 		if (path_index >= getPathCount())
 			throw new IllegalArgumentException();
 

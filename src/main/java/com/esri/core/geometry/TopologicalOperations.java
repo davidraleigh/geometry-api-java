@@ -29,7 +29,7 @@ import com.esri.core.geometry.MultiVertexGeometryImpl.GeometryXSimple;
 
 import java.util.ArrayList;
 
-final class TopologicalOperations {
+public final class TopologicalOperations {
 	TopoGraph m_topo_graph = null;
 	Point2D m_dummy_pt_1 = new Point2D();
 	Point2D m_dummy_pt_2 = new Point2D();
@@ -1135,7 +1135,7 @@ final class TopologicalOperations {
 				b_use_winding_rule_for_polygons, dirty_result, progress_tracker);
 	}
 
-	MultiVertexGeometry planarSimplify(EditShape shape, int geom,
+	public MultiVertexGeometry planarSimplify(EditShape shape, int geom,
 			double tolerance, boolean b_use_winding_rule_for_polygons,
 			boolean dirty_result, ProgressTracker progress_tracker) {
 		// This method will produce a polygon from a polyline when
@@ -1245,7 +1245,7 @@ final class TopologicalOperations {
 	}
 
 	// static
-	static MultiVertexGeometry planarSimplify(MultiVertexGeometry input_geom,
+	public static MultiVertexGeometry planarSimplify(MultiVertexGeometry input_geom,
 			double tolerance, boolean use_winding_rule_for_polygons,
 			boolean dirty_result, ProgressTracker progress_tracker) {
 		TopologicalOperations topoOps = new TopologicalOperations();
