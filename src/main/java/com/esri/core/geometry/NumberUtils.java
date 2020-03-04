@@ -64,7 +64,7 @@ public class NumberUtils {
 
 	final static double TheNaN = Double.NaN;
 
-	static double NaN() {
+	public static double NaN() {
 		return Double.NaN;
 	}
 
