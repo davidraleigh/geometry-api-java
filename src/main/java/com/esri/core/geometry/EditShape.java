@@ -32,7 +32,7 @@ import com.esri.core.geometry.Geometry.GeometryType;
  * geometries in linked lists. It allows constant time manipulation of geometry
  * vertices.
  */
-final class EditShape {
+public final class EditShape {
 	interface PathFlags_ {
 		static final int closedPath = 1;
 		static final int exteriorPath = 2;
@@ -528,7 +528,7 @@ final class EditShape {
 		}
 	}
 
-	EditShape() {
+	public EditShape() {
 		m_path_count = 0;
 		m_first_geometry = -1;
 		m_last_geometry = -1;
@@ -541,7 +541,7 @@ final class EditShape {
 	}
 
 	// Total point count in all geometries
-	int getTotalPointCount() {
+	public int getTotalPointCount() {
 		return m_point_count;
 	}
 
@@ -572,7 +572,7 @@ final class EditShape {
 	}
 
 	// Adds a Geometry to the Edit_shape
-	int addGeometry(Geometry geometry) {
+	public int addGeometry(Geometry geometry) {
 		Geometry.Type gt = geometry.getType();
 		if (Geometry.isMultiPath(gt.value()))
 			return addMultiPath_((MultiPath) geometry);
@@ -640,7 +640,7 @@ final class EditShape {
 	// Extracts a geometry from the Edit_shape. The method creates a new
 	// Geometry instance and initializes it with the Edit_shape data for the
 	// given geometry.
-	Geometry getGeometry(int geometry) {
+	public Geometry getGeometry(int geometry) {
 		int gt = getGeometryType(geometry);
 		Geometry geom = InternalUtils.createGeometry(gt,
 				m_vertices_mp.getDescription());
@@ -822,13 +822,13 @@ final class EditShape {
 	}
 
 	// Returns the first geometry in the Edit_shape.
-	int getFirstGeometry() {
+	public int getFirstGeometry() {
 		return m_first_geometry;
 	}
 
 	// Returns the next geometry in the Edit_shape. Returns -1 when there are no
 	// more geometries.
-	int getNextGeometry(int geom) {
+	public int getNextGeometry(int geom) {
 		return m_geometry_index_list.getField(geom, 1);
 	}
 
@@ -892,7 +892,7 @@ final class EditShape {
 	}
 
 	// Returns the first path of the geometry.
-	int getFirstPath(int geometry) {
+	public int getFirstPath(int geometry) {
 		return m_geometry_index_list.getField(geometry, 3);
 	}
 
@@ -1267,7 +1267,7 @@ final class EditShape {
 		}
 	}
 
-	Point2D getXY(int vertex) {
+	public Point2D getXY(int vertex) {
 		Point2D pt = new Point2D();
 		int vindex = getVertexIndex(vertex);
 		pt.setCoords(m_vertices.getXY(vindex));
@@ -1577,7 +1577,7 @@ final class EditShape {
 	}
 
 	// Returns the next path (-1 if there are no more paths in the geometry).
-	int getNextPath(int currentPath) {
+	public int getNextPath(int currentPath) {
 		return m_path_index_list.getField(currentPath, 2);
 	}
 
@@ -1588,7 +1588,7 @@ final class EditShape {
 	}
 
 	// Returns the number of vertices in the path.
-	int getPathSize(int path) {
+	public int getPathSize(int path) {
 		return m_path_index_list.getField(path, 3);
 	}
 
@@ -1793,7 +1793,7 @@ final class EditShape {
 
 	// Removes vertex from path. Uses either left or right segments to
 	// reconnect. Returns next vertex after erased one.
-	int removeVertex(int vertex, boolean b_left_segment) {
+	public int removeVertex(int vertex, boolean b_left_segment) {
 		int path = getPathFromVertex(vertex);
 		int prev = getPrevVertex(vertex);
 		int next = getNextVertex(vertex);
@@ -1842,7 +1842,7 @@ final class EditShape {
 	}
 
 	// Returns first vertex of the given path.
-	int getFirstVertex(int path) {
+	public int getFirstVertex(int path) {
 		return m_path_index_list.getField(path, 4);
 	}
 
@@ -1854,14 +1854,14 @@ final class EditShape {
 
 	// Returns next vertex. Closed paths are circular lists, so get_next_vertex
 	// always returns vertex. Open paths return -1 for last vertex.
-	int getNextVertex(int currentVertex) {
+	public int getNextVertex(int currentVertex) {
 		return m_vertex_index_list.getField(currentVertex, 2);
 	}
 
 	// Returns previous vertex. Closed paths are circular lists, so
 	// get_prev_vertex always returns vertex. Open paths return -1 for first
 	// vertex.
-	int getPrevVertex(int currentVertex) {
+	public int getPrevVertex(int currentVertex) {
 		return m_vertex_index_list.getField(currentVertex, 1);
 	}
 
