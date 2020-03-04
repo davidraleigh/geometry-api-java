@@ -124,7 +124,7 @@ public class NumberUtils {
 		return Integer.MAX_VALUE;
 	}
 
-	static double doubleEps() {
+	public static double doubleEps() {
 		return 2.2204460492503131e-016;
 	}
 

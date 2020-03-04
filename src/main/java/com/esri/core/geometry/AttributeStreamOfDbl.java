@@ -34,9 +34,9 @@ import static com.esri.core.geometry.SizeOf.SIZE_OF_ATTRIBUTE_STREAM_OF_DBL;
 import static com.esri.core.geometry.SizeOf.SIZE_OF_ATTRIBUTE_STREAM_OF_INT32;
 import static com.esri.core.geometry.SizeOf.sizeOfDoubleArray;
 
-final class AttributeStreamOfDbl extends AttributeStreamBase {
+public final class AttributeStreamOfDbl extends AttributeStreamBase {
 
-	private double[] m_buffer = null;
+	public double[] m_buffer = null;
 	private int m_size;
 
 	public int size() {

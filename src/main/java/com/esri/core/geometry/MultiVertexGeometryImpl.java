@@ -37,7 +37,7 @@ import com.esri.core.geometry.VertexDescription.Semantics;
  * is allocated only when the users asks for it, or sets a non-default value.
  * 
  */
-abstract class MultiVertexGeometryImpl extends MultiVertexGeometry {
+public abstract class MultiVertexGeometryImpl extends MultiVertexGeometry {
 
 	// HEADER DEFINED
 	public interface GeometryXSimple {
@@ -120,7 +120,7 @@ abstract class MultiVertexGeometryImpl extends MultiVertexGeometry {
 		return (m_flagsMask & flag) != 0;
 	}
 
-	protected void _setDirtyFlag(int flag, boolean bYesNo) {
+	public void _setDirtyFlag(int flag, boolean bYesNo) {
 		if (bYesNo)
 			m_flagsMask |= flag;
 		else
@@ -670,7 +670,7 @@ abstract class MultiVertexGeometryImpl extends MultiVertexGeometry {
 	 *            True, when the exact envelope need to be calculated and false
 	 *            for the loose one.
 	 */
-	protected void _updateAllDirtyIntervals(boolean bExact) {
+	public void _updateAllDirtyIntervals(boolean bExact) {
 		_verifyAllStreams();
 		if (_hasDirtyFlag(DirtyFlags.DirtyIntervals)) {
 			if (null == m_envelope)
