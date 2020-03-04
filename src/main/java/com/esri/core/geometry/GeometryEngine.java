@@ -887,7 +887,7 @@ public class GeometryEngine {
 	 *            The spatial reference of the geometry.
 	 * @return TRUE if the geometry is simple.
 	 */
-	static boolean isSimple(Geometry geometry, SpatialReference spatialReference) {
+	public static boolean isSimple(Geometry geometry, SpatialReference spatialReference) {
 		OperatorSimplify op = (OperatorSimplify) factory
 				.getOperator(Operator.Type.Simplify);
 		boolean result = op.isSimpleAsFeature(geometry, spatialReference, null);
