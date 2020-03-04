@@ -31,6 +31,10 @@ public abstract class OperatorImportFromWkt extends Operator {
 		return Type.ImportFromWkb;
 	}
 
+	public abstract GeometryCursor execute(int import_flags,
+	                                       SimpleStringCursor wkt_stringCursor,
+	                                       ProgressTracker progress_tracker);
+
 	/**
 	 * Performs the ImportFromWkt operation.
 	 * @param import_flags Use the {@link WktImportFlags} interface.
