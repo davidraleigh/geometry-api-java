@@ -746,7 +746,7 @@ public abstract class MultiPath extends MultiVertexGeometry implements
 	}
 
 	@Override
-	protected Object _getImpl() {
+	public Object _getImpl() {
 		return m_impl;
 	}
 
