@@ -58,7 +58,7 @@ public class NumberUtils {
 		return 1;
 	}
 
-	static boolean isNaN(double d) {
+	public static boolean isNaN(double d) {
 		return Double.isNaN(d);
 	}
 
@@ -120,11 +120,11 @@ public class NumberUtils {
 		return Double.POSITIVE_INFINITY;
 	}
 
-	static int intMax() {
+	public static int intMax() {
 		return Integer.MAX_VALUE;
 	}
 
-	static double doubleEps() {
+	public static double doubleEps() {
 		return 2.2204460492503131e-016;
 	}
 
@@ -132,7 +132,7 @@ public class NumberUtils {
 		return Double.MAX_VALUE;
 	}
 
-	static int nextRand(int prevRand) {
+	public static int nextRand(int prevRand) {
 		return (1103515245 * prevRand + 12345) & intMax(); // according to Wiki,
 															// this is gcc's
 	}

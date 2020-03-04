@@ -345,7 +345,7 @@ public abstract class Segment extends Geometry implements Serializable {
 	 * @return The number of intersection points, 0 when no intersection points
 	 *         exist.
 	 */
-	int intersect(Segment other, Point2D[] intersectionPoints,
+	public int intersect(Segment other, Point2D[] intersectionPoints,
 			double[] paramThis, double[] paramOther, double tolerance) {
 		return _intersect(other, intersectionPoints, paramThis, paramOther,
 				tolerance);
