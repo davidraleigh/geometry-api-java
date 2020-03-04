@@ -49,7 +49,7 @@ class OperatorImportFromGeoJsonLocal extends OperatorImportFromGeoJson {
 	};
 
 	@Override
-	MapGeometryCursor execute(int import_flags, StringCursor stringCursor, ProgressTracker progressTracker) {
+	public MapGeometryCursor execute(int import_flags, StringCursor stringCursor, ProgressTracker progressTracker) {
 		return new OperatorImportFromGeoJsonCursor(import_flags, stringCursor, progressTracker);
 	}
 
