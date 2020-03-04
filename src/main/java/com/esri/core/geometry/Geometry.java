@@ -377,7 +377,7 @@ public abstract class Geometry implements Serializable {
 		return 0;
 	}
 
-	protected Object _getImpl() {
+	public Object _getImpl() {
 		throw new RuntimeException("invalid call");
 	}
 
