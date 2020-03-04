@@ -120,7 +120,7 @@ public class NumberUtils {
 		return Double.POSITIVE_INFINITY;
 	}
 
-	static int intMax() {
+	public static int intMax() {
 		return Integer.MAX_VALUE;
 	}
 
@@ -132,7 +132,7 @@ public class NumberUtils {
 		return Double.MAX_VALUE;
 	}
 
-	static int nextRand(int prevRand) {
+	public static int nextRand(int prevRand) {
 		return (1103515245 * prevRand + 12345) & intMax(); // according to Wiki,
 															// this is gcc's
 	}
