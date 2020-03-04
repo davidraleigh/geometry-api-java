@@ -744,7 +744,7 @@ public final class Point2D implements Serializable{
 		return Point2D.construct(NumberUtils.NaN(), NumberUtils.NaN());
 	}
 
-	static Point2D calculateCircleCenterFromThreePoints(Point2D from, Point2D mid_point, Point2D to) {
+	public static Point2D calculateCircleCenterFromThreePoints(Point2D from, Point2D mid_point, Point2D to) {
 		if (from.isEqual(to) || from.isEqual(mid_point) || to.isEqual(mid_point)) {
 			return new Point2D(NumberUtils.NaN(), NumberUtils.NaN());
 		}
