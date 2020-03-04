@@ -35,7 +35,7 @@ import static com.esri.core.geometry.SizeOf.sizeOfObjectArray;
  * structs with Index_type members) Recycles the strides. Allows for constant
  * time creation and deletion of an element.
  */
-final class StridedIndexTypeCollection implements Serializable {
+public final class StridedIndexTypeCollection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int[][] m_buffer = null;
@@ -65,7 +65,7 @@ final class StridedIndexTypeCollection implements Serializable {
 	private final static int[] st_sizes = { 16, 32, 64, 128, 256, 512, 1024,
 			2048, 4096, 8192, 16384 };
 
-	StridedIndexTypeCollection(int stride) {
+	public StridedIndexTypeCollection(int stride) {
 		m_stride = stride;
 		m_realStride = stride;
 		m_blockSize = m_realBlockSize / m_realStride;
@@ -76,7 +76,7 @@ final class StridedIndexTypeCollection implements Serializable {
 		return true;
 	}
 	
-	void deleteElement(int element) {
+	public void deleteElement(int element) {
 		assert(dbgdelete_(element));
 		int totalStrides = (element >> m_blockPower) * m_blockSize
 				* m_realStride + (element & m_blockMask);
@@ -91,14 +91,14 @@ final class StridedIndexTypeCollection implements Serializable {
 	}
 
 	// Returns the given field of the element.
-	int getField(int element, int field) {
+	public int getField(int element, int field) {
 		assert(m_buffer[element >> m_blockPower][(element & m_blockMask) + 1] != -0x7eadbeed);
 		return m_buffer[element >> m_blockPower][(element & m_blockMask)
 				+ field];
 	}
 
 	// Sets the given field of the element.
-	void setField(int element, int field, int value) {
+	public void setField(int element, int field, int value) {
 		assert(m_buffer[element >> m_blockPower][(element & m_blockMask) + 1] != -0x7eadbeed);
 		m_buffer[element >> m_blockPower][(element & m_blockMask) + field] = value;
 	}
@@ -110,7 +110,7 @@ final class StridedIndexTypeCollection implements Serializable {
 
 	// Creates the new element. This is a constant time operation.
 	// All fields are initialized to -1.
-	int newElement() {
+	public int newElement() {
 		int element = m_firstFree;
 		if (element == -1) {
 			if (m_last == m_capacity) {
@@ -149,7 +149,7 @@ final class StridedIndexTypeCollection implements Serializable {
 	}
 
 	// Deletes all elements and frees all the memory if b_free_memory is True.
-	void deleteAll(boolean b_free_memory) {
+	public void deleteAll(boolean b_free_memory) {
 		m_firstFree = -1;
 		m_last = 0;
 		m_size = 0;
@@ -166,7 +166,7 @@ final class StridedIndexTypeCollection implements Serializable {
 
 	// Sets the capcity of the collection. Only applied if current capacity is
 	// smaller.
-	void setCapacity(int capacity) {
+	public void setCapacity(int capacity) {
 		if (capacity > m_capacity)
 			grow_(capacity);
 	}
@@ -190,7 +190,7 @@ final class StridedIndexTypeCollection implements Serializable {
 	}
 
 	// Swaps content of two fields
-	void swapField(int element1, int element2, int field) {
+	public void swapField(int element1, int element2, int field) {
 		int ar1[] = m_buffer[element1 >> m_blockPower];
 		int ar2[] = m_buffer[element2 >> m_blockPower];
 		int ind1 = (element1 & m_blockMask) + field;
