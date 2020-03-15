@@ -4,7 +4,7 @@ apply plugin: 'maven'
 // Inform IntelliJ projects about the generated code.
 apply plugin: 'idea'
 
-group = 'com.esri.geometry'
+group = 'org.epl.geometry'
 version = '2.2.3'
 
 description = """The Esri Geometry API for Java enables developers to write custom applications for analysis of spatial data."""
