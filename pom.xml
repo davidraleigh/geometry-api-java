@@ -1,15 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.esri.geometry</groupId>
-	<artifactId>esri-geometry-api</artifactId>
+	<groupId>org.epl.geometry</groupId>
+	<artifactId>epl-geometry-api</artifactId>
 	<version>2.2.3</version>
 	<packaging>jar</packaging>
 
-	<name>Esri Geometry API for Java</name>
-	<description>The Esri Geometry API for Java enables developers to write custom applications for analysis of spatial data.</description>
+	<name>More public methods version of Esri Geometry API for Java</name>
+	<description>More public methods version of The Esri Geometry API for Java enables developers to write custom applications for analysis of spatial data.</description>
 
-	<url>https://github.com/Esri/geometry-api-java</url>
+	<url>https://github.com/davidraleigh/geometry-api-java</url>
 
 	<licenses>
 		<license>
@@ -38,12 +38,21 @@
 				<role>developer</role>
 			</roles>
 		</developer>
+		<developer>
+			<id>davidraleigh</id>
+			<name>David Raleigh</name>
+			<organization>Near Space Labs</organization>
+			<organizationUrl>http://www.nearspacelabs.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+		</developer>
 	</developers>
 
 	<scm>
-		<connection>scm:git:git@github.com:Esri/geometry-api-java.git</connection>
-		<developerConnection>scm:git:git@github.com:Esri/geometry-api-java.git</developerConnection>
-		<url>git@github.com:Esri/geometry-api-java.git</url>
+		<connection>scm:git:git@github.com:davidraleigh/geometry-api-java.git</connection>
+		<developerConnection>scm:git:git@github.com:davidraleigh/geometry-api-java.git</developerConnection>
+		<url>git@github.com:davidraleigh/geometry-api-java.git</url>
 	</scm>
 
 	<profiles>
@@ -76,7 +85,7 @@
 		<profile>
 			<id>java8-disable-doclint</id>
 			<activation>
-				<jdk>[1.8,)</jdk>
+				<jdk>[11,)</jdk>
 			</activation>
 			<properties>
 				<javadoc.doclint.param>-Xdoclint:none</javadoc.doclint.param>
@@ -85,17 +94,18 @@
 	</profiles>
 
 	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
+		<repository>
+			<id>github</id>
+			<name>GitHub davidraleigh Apache Maven Packages</name>
+			<url>https://maven.pkg.github.com/davidraleigh/geometry-api-java</url>
+		</repository>
 	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<java.source.version>1.7</java.source.version>
-		<java.target.version>1.7</java.target.version>
+		<java.source.version>11</java.source.version>
+		<java.target.version>11</java.target.version>
 
 		<!-- dependency versions -->
 		<jackson.version>2.9.6</jackson.version>
@@ -170,37 +180,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${javadoc.plugin.version}</version>
-				<configuration>
-					<link>http://help.arcgis.com/EN/sdk/10.0/Java_AO_ADF/api/arcobjects</link>
-					<link>http://docs.oracle.com/javase/6/docs/api/</link>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<additionalparam>${javadoc.doclint.param}</additionalparam>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.8</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
