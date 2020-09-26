@@ -52,6 +52,8 @@ public abstract class ByteBufferCursor implements Iterator<ByteBuffer> {
 
 	public abstract SimpleStateEnum getSimpleState();
 
+	public abstract Envelope2D getEnvelope2D();
+
 	public abstract boolean hasNext();
 
 }

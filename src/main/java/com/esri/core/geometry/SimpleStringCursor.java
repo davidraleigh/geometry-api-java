@@ -14,6 +14,7 @@ public class SimpleStringCursor extends StringCursor {
 	private String m_currentFeatureID = "";
 	private int m_current_id = -1;
 	private SimpleStateEnum m_current_state = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D m_env2D = new Envelope2D();
 
 	@Deprecated
 	public SimpleStringCursor(String inputString) {
@@ -95,6 +96,11 @@ public class SimpleStringCursor extends StringCursor {
 	@Override
 	public SimpleStateEnum getSimpleState() {
 		return m_current_state;
+	}
+
+	@Override
+	public Envelope2D getEnvelope2D() {
+		return m_env2D;
 	}
 
 	@Override

@@ -11,5 +11,7 @@ public abstract class StringCursor implements Iterator<String> {
 
 	public abstract SimpleStateEnum getSimpleState();
 
+	public abstract Envelope2D getEnvelope2D();
+
 	public abstract boolean hasNext();
 }

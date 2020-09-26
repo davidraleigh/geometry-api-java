@@ -34,6 +34,7 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	private int m_exportFlags;
 	private ByteBuffer m_shapeBuffer;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D env2D = new Envelope2D();
 
 	public OperatorExportToESRIShapeCursor(int exportFlags, GeometryCursor geometryCursor) {
 		if (geometryCursor == null)
@@ -55,6 +56,7 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 		if (hasNext()) {
 			geometry = m_geometryCursor.next();
 			simpleStateEnum = geometry.getSimpleState();
+			geometry.queryEnvelope2D(env2D);
 			int size = exportToESRIShape(m_exportFlags, geometry, null);
 			if (m_shapeBuffer == null || size > m_shapeBuffer.capacity())
 				m_shapeBuffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
@@ -68,6 +70,9 @@ public class OperatorExportToESRIShapeCursor extends ByteBufferCursor {
 	public SimpleStateEnum getSimpleState() {
 		return simpleStateEnum;
 	}
+
+	@Override
+	public Envelope2D getEnvelope2D() { return env2D; }
 
 	@Override
 	public String getFeatureID() {
