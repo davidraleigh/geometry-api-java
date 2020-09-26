@@ -7,6 +7,7 @@ public class OperatorExportToWkbCursor extends ByteBufferCursor {
 	private GeometryCursor m_geometryCursor;
 	int m_exportFlags;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D env2D = new Envelope2D();
 
 	public OperatorExportToWkbCursor(int exportFlags, GeometryCursor geometryCursor) {
 		if (geometryCursor == null)
@@ -26,6 +27,7 @@ public class OperatorExportToWkbCursor extends ByteBufferCursor {
 		Geometry geometry;
 		if (hasNext()) {
 			geometry = m_geometryCursor.next();
+			geometry.queryEnvelope2D(env2D);
 			simpleStateEnum = geometry.getSimpleState();
 			int size = OperatorExportToWkbLocal.exportToWKB(m_exportFlags, geometry, null);
 			ByteBuffer wkbBuffer = ByteBuffer.allocate(size).order(ByteOrder.nativeOrder());
@@ -46,7 +48,13 @@ public class OperatorExportToWkbCursor extends ByteBufferCursor {
 	}
 
 	@Override
+	public Envelope2D getEnvelope2D() {
+		return env2D;
+	}
+
+	@Override
 	public String getFeatureID() {
 		return m_geometryCursor.getFeatureID();
 	}
+
 }

@@ -4,6 +4,7 @@ public class OperatorExportToWktCursor extends StringCursor {
 	private GeometryCursor m_geometryCursor;
 	private int m_export_flags;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D env2D = new Envelope2D();
 
 	public OperatorExportToWktCursor(int exportFlags, GeometryCursor geometryCursor, ProgressTracker progressTracker) {
 		if (geometryCursor == null)
@@ -18,6 +19,7 @@ public class OperatorExportToWktCursor extends StringCursor {
 		Geometry geometry;
 		if (hasNext()) {
 			geometry = m_geometryCursor.next();
+			geometry.queryEnvelope2D(env2D);
 			simpleStateEnum = geometry.getSimpleState();
 			StringBuilder stringBuilder = new StringBuilder();
 			OperatorExportToWktLocal.exportToWkt(m_export_flags, geometry, stringBuilder);
@@ -39,6 +41,11 @@ public class OperatorExportToWktCursor extends StringCursor {
 	@Override
 	public SimpleStateEnum getSimpleState() {
 		return simpleStateEnum;
+	}
+
+	@Override
+	public Envelope2D getEnvelope2D() {
+		return env2D;
 	}
 
 	@Override

@@ -38,6 +38,7 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 	private int m_current_id = -1;
 	private SimpleStateEnum m_currentSimpleState = SimpleStateEnum.SIMPLE_UNKNOWN;
 	private String m_currentFeatureID = "";
+	private Envelope2D m_env2D = new Envelope2D();
 
 	@Deprecated
 	public SimpleByteBufferCursor(ByteBuffer byteBuffer) {
@@ -113,6 +114,11 @@ public class SimpleByteBufferCursor extends ByteBufferCursor {
 	@Override
 	public SimpleStateEnum getSimpleState() {
 		return m_currentSimpleState;
+	}
+
+	@Override
+	public Envelope2D getEnvelope2D() {
+		return m_env2D;
 	}
 
 	@Override

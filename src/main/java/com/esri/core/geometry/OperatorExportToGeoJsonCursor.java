@@ -52,6 +52,7 @@ public class OperatorExportToGeoJsonCursor extends StringCursor {
 	private SpatialReference m_spatialReference;
 	private int m_export_flags;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D env2D = new Envelope2D();
 
 	public OperatorExportToGeoJsonCursor(int export_flags, SpatialReference spatialReference,
 	                                     GeometryCursor geometryCursor) {
@@ -73,6 +74,7 @@ public class OperatorExportToGeoJsonCursor extends StringCursor {
 		Geometry geometry;
 		if (hasNext()) {
 			geometry = m_geometryCursor.next();
+			geometry.queryEnvelope2D(env2D);
 			simpleStateEnum = geometry.getSimpleState();
 			return exportToGeoJson(m_export_flags, geometry, m_spatialReference);
 		}
@@ -88,6 +90,9 @@ public class OperatorExportToGeoJsonCursor extends StringCursor {
 	public SimpleStateEnum getSimpleState() {
 		return simpleStateEnum;
 	}
+
+	@Override
+	public Envelope2D getEnvelope2D() { return env2D; }
 
 	@Override
 	public boolean hasNext() {

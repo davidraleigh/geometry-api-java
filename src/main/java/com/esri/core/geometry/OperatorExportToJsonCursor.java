@@ -32,6 +32,7 @@ public class OperatorExportToJsonCursor extends StringCursor {
 	private GeometryCursor m_geometryCursor;
 	private SpatialReference m_spatialReference;
 	private SimpleStateEnum simpleStateEnum = SimpleStateEnum.SIMPLE_UNKNOWN;
+	private Envelope2D env2D = new Envelope2D();
 
 
 	public OperatorExportToJsonCursor(SpatialReference spatialReference, GeometryCursor geometryCursor) {
@@ -53,6 +54,7 @@ public class OperatorExportToJsonCursor extends StringCursor {
 		Geometry geometry;
 		if (hasNext()) {
 			geometry = m_geometryCursor.next();
+			geometry.queryEnvelope2D(env2D);
 			simpleStateEnum = geometry.getSimpleState();
 			return exportToString(geometry, m_spatialReference, null);
 		}
@@ -67,6 +69,11 @@ public class OperatorExportToJsonCursor extends StringCursor {
 	@Override
 	public SimpleStateEnum getSimpleState() {
 		return simpleStateEnum;
+	}
+
+	@Override
+	public Envelope2D getEnvelope2D() {
+		return env2D;
 	}
 
 	@Override
