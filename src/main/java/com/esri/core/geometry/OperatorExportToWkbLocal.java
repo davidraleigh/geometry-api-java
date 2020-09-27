@@ -45,7 +45,7 @@ class OperatorExportToWkbLocal extends OperatorExportToWkb {
 		return exportToWKB(exportFlags, geometry, wkbBuffer);
 	}
 
-	private static int exportToWKB(int exportFlags, Geometry geometry,
+	protected static int exportToWKB(int exportFlags, Geometry geometry,
 	                                 ByteBuffer wkbBuffer) {
 		if (geometry == null)
 			return 0;
