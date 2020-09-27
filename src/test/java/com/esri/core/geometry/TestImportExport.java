@@ -1755,14 +1755,7 @@ public class TestImportExport extends TestCase {
 	}
 
 	@Test
-	public void testImportExportEWKB() {
-		String[] shapelyHex = {"010600008001000000010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
-				"010600008001000000010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
-				"010600008001000000010300008001000000040000009A99999999195DC09A9999999999464000000000000047400000000000805DC0000000000080474000000000008044400000000000005EC0000000000080484000000000008044409A99999999195DC09A999999999946400000000000004740",
-				"010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
-				"010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
-				"010300008001000000040000009A99999999195DC09A9999999999464000000000000047400000000000805DC0000000000080474000000000008044400000000000005EC0000000000080484000000000008044409A99999999195DC09A999999999946400000000000004740"};
-
+	public void testImportExportEWKBFromWKT() {
 		String [] testWkts = {
 				"MULTIPOINT ZM(-116.4 45.2 46.0 0.2, -118.0 47.0 41.0 0.0, -120.0 49.0 41.0 0.3)",
 				"MULTILINESTRING ((-116.4 45.2, -118.0 47.0))",
@@ -1808,6 +1801,62 @@ public class TestImportExport extends TestCase {
 				"POINT Z(-116.4 45.2 46.0)",
 				"POINT M(-116.4 45.2 46.0)",
 				"POINT ZM(-116.4 45.2 46.0 0.2)"};
+
+		for (String testWkt : testWkts) {
+			try {
+				OperatorImportFromWkt operator = (OperatorImportFromWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkt);
+				Geometry geometryWkt = operator.execute(0, Geometry.Type.Unknown, testWkt, null);
+
+				SimpleGeometryCursor geometryCursorWktToWkb = new SimpleGeometryCursor(geometryWkt);
+				OperatorExportToWkbCursor operatorExportToWkbCursor1 = new OperatorExportToWkbCursor(0, geometryCursorWktToWkb);
+				OperatorImportFromWkbCursor operatorImportFromWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor1);
+				OperatorExportToWkbCursor operatorExportToEWkbCursor1 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, operatorImportFromWkbCursor1);
+				OperatorImportFromWkbCursor operatorImportFromEWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor1);
+
+				SimpleGeometryCursor geometryCursorWktToEWkb = new SimpleGeometryCursor(geometryWkt);
+				OperatorExportToWkbCursor operatorExportToEWkbCursor2 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, geometryCursorWktToEWkb);
+				OperatorImportFromWkbCursor operatorImportFromEWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor2);
+				OperatorExportToWkbCursor operatorExportToWkbCursor2 = new OperatorExportToWkbCursor(0, operatorImportFromEWkbCursor2);
+				OperatorImportFromWkbCursor operatorImportFromWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor2);
+
+				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromEWkbCursor1.next(), SpatialReference.create(4326)));
+				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromWkbCursor2.next(), SpatialReference.create(4326)));
+			} catch (Exception e) {
+				fail(String.format("%s %s", testWkt, e.getMessage()));
+			}
+		}
+
+		for (String testWkt : testWkts) {
+			try {
+				OperatorImportFromWkt operator = (OperatorImportFromWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkt);
+				Geometry geometryWkt = operator.execute(0, Geometry.Type.Unknown, testWkt, null);
+
+				SimpleGeometryCursor geometryCursorWktToWkb = new SimpleGeometryCursor(geometryWkt);
+				OperatorExportToWkbCursor operatorExportToWkbCursor1 = new OperatorExportToWkbCursor(0, geometryCursorWktToWkb);
+				OperatorImportFromWkbCursor operatorImportFromWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor1);
+
+				SimpleGeometryCursor geometryCursorWktToEWkb = new SimpleGeometryCursor(geometryWkt);
+				OperatorExportToWkbCursor operatorExportToEWkbCursor2 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, geometryCursorWktToEWkb);
+				OperatorImportFromWkbCursor operatorImportFromEWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor2);
+
+				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromWkbCursor1.next(), SpatialReference.create(4326)));
+				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromEWkbCursor2.next(), SpatialReference.create(4326)));
+			} catch (Exception e) {
+				fail(String.format("%s %s", testWkt, e.getMessage()));
+			}
+		}
+	}
+
+	@Test
+	public void testImportExportEWKBFromHex() {
+		String[] shapelyHex = {"010600008001000000010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
+				"010600008001000000010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
+				"010600008001000000010300008001000000040000009A99999999195DC09A9999999999464000000000000047400000000000805DC0000000000080474000000000008044400000000000005EC0000000000080484000000000008044409A99999999195DC09A999999999946400000000000004740",
+				"010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
+				"010300008001000000040000009A99999999994640000000000080484000000000008044400000000000804740000000000000474000000000008044400000000000004740000000000080474000000000008044409A9999999999464000000000008048400000000000804440",
+				"010300008001000000040000009A99999999195DC09A9999999999464000000000000047400000000000805DC0000000000080474000000000008044400000000000005EC0000000000080484000000000008044409A99999999195DC09A999999999946400000000000004740"};
+
+
 		for (String shapely : shapelyHex) {
 			byte[] ewkb =  hexStringToByteArray(shapely);
 			OperatorImportFromWkb operatorImportFromWkb = (OperatorImportFromWkb)OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
@@ -1829,50 +1878,6 @@ public class TestImportExport extends TestCase {
 			// size
 			assertEquals(expected.array().length, byteBuffer.array().length);
 		}
-
-//		for (String testWkt : testWkts) {
-//			try {
-//				OperatorImportFromWkt operator = (OperatorImportFromWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkt);
-//				Geometry geometryWkt = operator.execute(0, Geometry.Type.Unknown, testWkt, null);
-//
-//				SimpleGeometryCursor geometryCursorWktToWkb = new SimpleGeometryCursor(geometryWkt);
-//				OperatorExportToWkbCursor operatorExportToWkbCursor1 = new OperatorExportToWkbCursor(0, geometryCursorWktToWkb);
-//				OperatorImportFromWkbCursor operatorImportFromWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor1);
-//				OperatorExportToWkbCursor operatorExportToEWkbCursor1 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, operatorImportFromWkbCursor1);
-//				OperatorImportFromWkbCursor operatorImportFromEWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor1);
-//
-//				SimpleGeometryCursor geometryCursorWktToEWkb = new SimpleGeometryCursor(geometryWkt);
-//				OperatorExportToWkbCursor operatorExportToEWkbCursor2 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, geometryCursorWktToEWkb);
-//				OperatorImportFromWkbCursor operatorImportFromEWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor2);
-//				OperatorExportToWkbCursor operatorExportToWkbCursor2 = new OperatorExportToWkbCursor(0, operatorImportFromEWkbCursor2);
-//				OperatorImportFromWkbCursor operatorImportFromWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor2);
-//
-//				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromEWkbCursor1.next(), SpatialReference.create(4326)));
-//				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromWkbCursor2.next(), SpatialReference.create(4326)));
-//			} catch (Exception e) {
-//				fail(String.format("%s %s", testWkt, e.getMessage()));
-//			}
-//		}
-//
-//		for (String testWkt : testWkts) {
-//			try {
-//				OperatorImportFromWkt operator = (OperatorImportFromWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkt);
-//				Geometry geometryWkt = operator.execute(0, Geometry.Type.Unknown, testWkt, null);
-//
-//				SimpleGeometryCursor geometryCursorWktToWkb = new SimpleGeometryCursor(geometryWkt);
-//				OperatorExportToWkbCursor operatorExportToWkbCursor1 = new OperatorExportToWkbCursor(0, geometryCursorWktToWkb);
-//				OperatorImportFromWkbCursor operatorImportFromWkbCursor1 = new OperatorImportFromWkbCursor(0, operatorExportToWkbCursor1);
-//
-//				SimpleGeometryCursor geometryCursorWktToEWkb = new SimpleGeometryCursor(geometryWkt);
-//				OperatorExportToWkbCursor operatorExportToEWkbCursor2 = new OperatorExportToWkbCursor(WkbExportFlags.wkbExportAsExtendedWkb, geometryCursorWktToEWkb);
-//				OperatorImportFromWkbCursor operatorImportFromEWkbCursor2 = new OperatorImportFromWkbCursor(0, operatorExportToEWkbCursor2);
-//
-//				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromWkbCursor1.next(), SpatialReference.create(4326)));
-//				assertTrue(testWkt, GeometryEngine.equals(geometryWkt, operatorImportFromEWkbCursor2.next(), SpatialReference.create(4326)));
-//			} catch (Exception e) {
-//				fail(String.format("%s %s", testWkt, e.getMessage()));
-//			}
-//		}
 	}
 
 	public static Polygon makePolygon() {
