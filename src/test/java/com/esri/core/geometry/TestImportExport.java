@@ -30,6 +30,8 @@ import java.nio.ByteOrder;
 import junit.framework.TestCase;
 import org.junit.Test;
 
+import static com.esri.core.geometry.WkbExportFlags.wkbExportStripSrid;
+
 public class TestImportExport extends TestCase {
 
 	@Override
@@ -44,15 +46,6 @@ public class TestImportExport extends TestCase {
 
 	@Test
 	public static void testImportExportShapePolygon() {
-//		{
-//			String s = "MULTIPOLYGON (((-1.4337158203098852 53.42590083930004, -1.4346462383651897 53.42590083930004, -1.4349713164114632 53.42426406667512, -1.4344808816770183 53.42391134176576, -1.4337158203098852 53.424339319373516, -1.4337158203098852 53.42590083930004, -1.4282226562499147 53.42590083930004, -1.4282226562499147 53.42262754610009, -1.423659941537096 53.42262754610009, -1.4227294921872726 53.42418897437618, -1.4199829101572732 53.42265258737483, -1.4172363281222147 53.42418897437334, -1.4144897460898278 53.42265258737625, -1.4144897460898278 53.42099079900008, -1.4117431640598568 53.42099079712516, -1.4117431640598568 53.41849780932388, -1.4112778948070286 53.41771711805022, -1.4114404909237805 53.41689867267529, -1.411277890108579 53.416080187950215, -1.4117431640598568 53.4152995338453, -1.4117431657531654 53.40953184824072, -1.41723632610001 53.40953184402311, -1.4172363281199125 53.406257299700044, -1.4227294921899158 53.406257299700044, -1.4227294921899158 53.40789459668797, -1.4254760767598498 53.40789460061099, -1.4262193642339867 53.40914148401417, -1.4273828468095076 53.409531853100034, -1.4337158203098852 53.409531790075235, -1.4337158203098852 53.41280609140024, -1.4392089843723568 53.41280609140024, -1.439208984371362 53.41608014067522, -1.441160015802268 53.41935368587538, -1.4427511170075604 53.41935368587538, -1.4447021484373863 53.42099064750012, -1.4501953124999432 53.42099064750012, -1.4501953124999432 53.43214683850347, -1.4513643355446106 53.434108816701794, -1.4502702625278232 53.43636597733034, -1.4494587195580948 53.437354845300334, -1.4431075935937656 53.437354845300334, -1.4372459179209045 53.43244635455021, -1.433996276212838 53.42917388040006, -1.4337158203098852 53.42917388040006, -1.4337158203098852 53.42590083930004)))";
-//			Geometry g = OperatorImportFromWkt.local().execute(0,  Geometry.Type.Unknown, s, null);
-//			boolean result1 = OperatorSimplify.local().isSimpleAsFeature(g, null, null);
-//			boolean result2 = OperatorSimplifyOGC.local().isSimpleOGC(g, null, true, null, null);
-//			Geometry simple = OperatorSimplifyOGC.local().execute(g, null, true, null);
-//			OperatorFactoryLocal.saveToWKTFileDbg("c:/temp/simplifiedeeee",  simple, null);
-//			int i = 0;
-//		}
 		OperatorExportToESRIShape exporterShape = (OperatorExportToESRIShape) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToESRIShape);
 		OperatorImportFromESRIShape importerShape = (OperatorImportFromESRIShape) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromESRIShape);
 
@@ -388,7 +381,7 @@ public class TestImportExport extends TestCase {
 	}
 
 	@Test
-	public static void testImportExportWKBPolygon() {
+	public void testImportExportWKBPolygon() {
 		OperatorExportToWkb exporterWKB = (OperatorExportToWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
 		OperatorExportToWkt exporterWKT = (OperatorExportToWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkt);
 		OperatorImportFromWkb importerWKB = (OperatorImportFromWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
@@ -546,7 +539,170 @@ public class TestImportExport extends TestCase {
 	}
 
 	@Test
-	public static void testImportExportWKBPolyline() {
+	public void testImportExportEWKBPolygon() {
+		OperatorExportToEWkb exporterWKB = (OperatorExportToEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
+		OperatorExportToWkt exporterWKT = (OperatorExportToWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkt);
+		OperatorImportFromEWkb importerWKB = (OperatorImportFromEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+		SpatialReference spatialReference = SpatialReference.create(4326);
+
+		// Test Import Polygon with bad rings
+		int offset = 0;
+		ByteBuffer wkbBuffer = ByteBuffer.allocate(500).order(ByteOrder.nativeOrder());
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbPolygon);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 8);
+		offset += 4; // num rings
+		wkbBuffer.putInt(offset, 4);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 0.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 0.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 0.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 10.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 10.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 10.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 0.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 0.0);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 1);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 36.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 17.0);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 2);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 19.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 19.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, -19.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, -19.0);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 4);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 23.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 13.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 43.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 59.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 79.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 83.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 87.0);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 3);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 23.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 43.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 67.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 79.0);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 0);
+		offset += 4; // num points
+		wkbBuffer.putInt(offset, 3);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 23.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 43.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 67.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // y
+		wkbBuffer.putInt(offset, 2);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 23.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 67.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 43.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 67.0);
+		offset += 8; // y
+
+		MapGeometry p = importerWKB.execute(0, Geometry.Type.Polygon, wkbBuffer, null);
+		int pc = ((Polygon) p.getGeometry()).getPathCount();
+		String wktString = exporterWKT.execute(0, p.getGeometry(), null);
+		assertTrue(wktString.equals("MULTIPOLYGON (((0 0, 10 10, 0 10, 0 0), (36 17, 36 17, 36 17), (19 19, -19 -19, 19 19), (23 88, 83 87, 59 79, 13 43, 23 88), (23 88, 67 79, 88 43, 23 88), (23 88, 67 88, 88 43, 23 88), (23 67, 43 67, 23 67)))"));
+
+		wktString = exporterWKT.execute(WktExportFlags.wktExportPolygon, p.getGeometry(), null);
+		assertTrue(wktString.equals("POLYGON ((0 0, 10 10, 0 10, 0 0), (36 17, 36 17, 36 17), (19 19, -19 -19, 19 19), (23 88, 83 87, 59 79, 13 43, 23 88), (23 88, 67 79, 88 43, 23 88), (23 88, 67 88, 88 43, 23 88), (23 67, 43 67, 23 67))"));
+
+		Polygon polygon = makePolygon();
+
+		// Test Import Polygon from Polygon8
+		ByteBuffer polygonWKBBuffer = exporterWKB.execute(0, polygon, spatialReference, null);
+		long wkbType = java.lang.Integer.toUnsignedLong(polygonWKBBuffer.getInt(1));
+		long expectedType = java.lang.Integer.toUnsignedLong(WkbGeometryType.eWkbMultiPolygonZMS);
+		assertEquals(wkbType, expectedType);
+		MapGeometry polygonWKBGeometry = importerWKB.execute(0, Geometry.Type.Polygon, polygonWKBBuffer, null);
+		assertEquals(spatialReference.getID(), polygonWKBGeometry.getSpatialReference().getID());
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polygonWKBGeometry.getGeometry(), polygon);
+
+		// Test WKB_export_multi_polygon on nonempty single part polygon
+		Polygon polygon2 = makePolygon2();
+		assertEquals(1, polygon2.getPathCount());
+		polygonWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportMultiPolygon | wkbExportStripSrid, polygon2, null, null);
+		polygonWKBGeometry = importerWKB.execute(0, Geometry.Type.Polygon, polygonWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polygonWKBGeometry.getGeometry(), polygon2);
+		wkbType = java.lang.Integer.toUnsignedLong(polygonWKBBuffer.getInt(1));
+		expectedType = java.lang.Integer.toUnsignedLong(WkbGeometryType.eWkbMultiPolygonZM);
+		assertEquals(wkbType, expectedType);
+
+		// Test WKB_export_polygon on nonempty single part polygon
+		assertEquals(1, polygon2.getPathCount());
+		polygonWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportPolygon, polygon2, null, null);
+		polygonWKBGeometry = importerWKB.execute(0, Geometry.Type.Polygon, polygonWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polygonWKBGeometry.getGeometry(), polygon2);
+		wkbType = java.lang.Integer.toUnsignedLong(polygonWKBBuffer.getInt(1));
+		expectedType = java.lang.Integer.toUnsignedLong(WkbGeometryType.eWkbPolygonZM);
+		assertEquals(wkbType, expectedType);
+
+		// Test WKB_export_polygon on empty polygon
+		Polygon polygon3 = new Polygon();
+		polygonWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportPolygon, polygon3, null, null);
+		polygonWKBGeometry = importerWKB.execute(0, Geometry.Type.Polygon, polygonWKBBuffer, null);
+		assertTrue(polygonWKBGeometry.getGeometry().isEmpty());
+		wkbType = polygonWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.wkbPolygon);
+
+		// Test WKB_export_defaults on empty polygon
+		polygonWKBBuffer = exporterWKB.execute(0, polygon3, null, null);
+		polygonWKBGeometry = importerWKB.execute(0, Geometry.Type.Polygon, polygonWKBBuffer, null);
+		assertTrue(polygonWKBGeometry.getGeometry().isEmpty());
+		wkbType = polygonWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.wkbMultiPolygon);
+	}
+
+	@Test
+	public void testImportExportWKBPolyline() {
 		OperatorExportToWkb exporterWKB = (OperatorExportToWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
 		OperatorExportToWkt exporterWKT = (OperatorExportToWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkt);
 		OperatorImportFromWkb importerWKB = (OperatorImportFromWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
@@ -659,7 +815,171 @@ public class TestImportExport extends TestCase {
 	}
 
 	@Test
-	public static void testImportExportWKBMultiPoint() {
+	public void testImportExportEWKBPolyline() {
+		OperatorExportToEWkb exporterEWKB = (OperatorExportToEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
+		OperatorExportToWkt exporterWKT = (OperatorExportToWkt) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkt);
+		OperatorImportFromEWkb importerEWKB = (OperatorImportFromEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+
+		// Test Import Polyline with bad paths (i.e. paths with one point or
+		// zero points)
+		int offset = 0;
+		ByteBuffer wkbBuffer = ByteBuffer.allocate(500).order(ByteOrder.nativeOrder());
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbMultiLineString);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 4);
+		offset += 4; // num paths
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbLineString);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 1);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 36.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 17.0);
+		offset += 8; // y
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbLineString);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 0);
+		offset += 4; // num points
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbLineString);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 1);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 19.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 19.0);
+		offset += 8; // y
+		wkbBuffer.put(offset, (byte) WkbByteOrder.wkbNDR);
+		offset += 1; // byte order
+		wkbBuffer.putInt(offset, WkbGeometryType.wkbLineString);
+		offset += 4; // type
+		wkbBuffer.putInt(offset, 3);
+		offset += 4; // num points
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 29.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 13.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 43.0);
+		offset += 8; // y
+		wkbBuffer.putDouble(offset, 59.0);
+		offset += 8; // x
+		wkbBuffer.putDouble(offset, 88);
+		offset += 8; // y
+
+		Polyline p = (Polyline) (importerEWKB.execute(0, Geometry.Type.Polyline, wkbBuffer, null).getGeometry());
+		int pc = p.getPointCount();
+		int pac = p.getPathCount();
+		assertEquals(7, p.getPointCount());
+		assertEquals(3, p.getPathCount());
+
+		String wktString = exporterWKT.execute(0, p, null);
+		assertTrue(wktString.equals("MULTILINESTRING ((36 17, 36 17), (19 19, 19 19), (88 29, 13 43, 59 88))"));
+
+		Polyline polyline = makePolyline();
+		polyline.dropAttribute(VertexDescription.Semantics.ID);
+
+		// Test Import Polyline from Polyline
+		ByteBuffer polylineEWKBBuffer = exporterEWKB.execute(0, polyline, SpatialReference.create(4326), null);
+		int wkbType = polylineEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbMultiLineStringZMS);
+		MapGeometry polylineEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polylineEWKBMapGeometry.getGeometry(), polyline);
+		assertEquals(4326, polylineEWKBMapGeometry.getSpatialReference().getID());
+
+		polylineEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportMultiLineString | wkbExportStripSrid, polylineEWKBMapGeometry.getGeometry(), polylineEWKBMapGeometry.getSpatialReference(),null);
+		MapGeometry polylineEWKBMapGeometry2 = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		assertNull(polylineEWKBMapGeometry2.getSpatialReference());
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polylineEWKBMapGeometry.getGeometry(), (MultiVertexGeometry)polylineEWKBMapGeometry2.getGeometry());
+		wkbType = polylineEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbMultiLineStringZM);
+
+		// Test wkbExportMultiPolyline on nonempty single part polyline
+		Polyline polyline2 = makePolyline2();
+		assertEquals(1, polyline2.getPathCount());
+		polylineEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportMultiLineString, polyline2, null,null);
+		polylineEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polylineEWKBMapGeometry.getGeometry(), polyline2);
+		wkbType = polylineEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbMultiLineStringZM);
+
+		// Test wkbExportPolyline on nonempty single part polyline
+		assertEquals(1, polyline2.getPathCount());
+		polylineEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportLineString, polyline2, null, null);
+		polylineEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) polylineEWKBMapGeometry.getGeometry(), polyline2);
+		wkbType = polylineEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbLineStringZM);
+
+		// Test wkbExportPolyline on empty polyline
+		Polyline polyline3 = new Polyline();
+		polylineEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportLineString, polyline3, null, null);
+		polylineEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		assertEquals(true, polylineEWKBMapGeometry.getGeometry().isEmpty());
+		wkbType = polylineEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.wkbLineString);
+
+		// Test EWKB_export_defaults on empty polyline
+		polylineEWKBBuffer = exporterEWKB.execute(0, polyline3, null, null);
+		polylineEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Polyline, polylineEWKBBuffer, null);
+		assertTrue(polylineEWKBMapGeometry.getGeometry().isEmpty() == true);
+		wkbType = polylineEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbMultiLineString);
+	}
+
+	@Test
+	public void testImportExportEWKBMultiPoint() {
+		OperatorExportToEWkb exporterEWKB = (OperatorExportToEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
+		OperatorImportFromEWkb importerEWKB = (OperatorImportFromEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+
+		MultiPoint multipoint = makeMultiPoint();
+		multipoint.dropAttribute(VertexDescription.Semantics.ID);
+
+		// Test Import Multi_point from Multi_point
+		ByteBuffer multipointEWKBBuffer = exporterEWKB.execute(0, multipoint, SpatialReference.create(4326),null);
+		int wkbType = multipointEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbMultiPointZS);
+		MapGeometry multipointEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.MultiPoint, multipointEWKBBuffer, null);
+		TestCommonMethods.compareGeometryContent((MultiVertexGeometry) multipointEWKBMapGeometry.getGeometry(), multipoint);
+		assertEquals(4326, multipointEWKBMapGeometry.getSpatialReference().getID());
+
+		// Test EWKB_export_point on nonempty single point Multi_point
+		MultiPoint multipoint2 = makeMultiPoint2();
+		assertTrue(multipoint2.getPointCount() == 1);
+		ByteBuffer pointEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportPoint, multipoint2, null,null);
+		Point pointEWKBGeometry = (Point) (importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null).getGeometry());
+		Point3D point3d, mpoint3d;
+		point3d = pointEWKBGeometry.getXYZ();
+		mpoint3d = multipoint2.getXYZ(0);
+		assertTrue(point3d.x == mpoint3d.x && point3d.y == mpoint3d.y && point3d.z == mpoint3d.z);
+		wkbType = pointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.eWkbPointZ);
+
+		// Test EWKB_export_point on empty Multi_point
+		MultiPoint multipoint3 = new MultiPoint();
+		pointEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportPoint, multipoint3, null,null);
+		pointEWKBGeometry = (Point) (importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null).getGeometry());
+		assertTrue(pointEWKBGeometry.isEmpty() == true);
+		wkbType = pointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbPoint);
+
+		// Test EWKB_export_defaults on empty Multi_point
+		multipointEWKBBuffer = exporterEWKB.execute(0, multipoint3, null, null);
+		MultiPoint multipointEWKBGeometry = (MultiPoint) (importerEWKB.execute(0, Geometry.Type.MultiPoint, multipointEWKBBuffer, null).getGeometry());
+		assertTrue(multipointEWKBGeometry.isEmpty() == true);
+		wkbType = multipointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbMultiPoint);
+	}
+
+	public void testImportExportWKBMultiPoint() {
 		OperatorExportToWkb exporterWKB = (OperatorExportToWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
 		OperatorImportFromWkb importerWKB = (OperatorImportFromWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
 
@@ -702,7 +1022,7 @@ public class TestImportExport extends TestCase {
 	}
 
 	@Test
-	public static void testImportExportWKBPoint() {
+	public void testImportExportWKBPoint() {
 		OperatorExportToWkb exporterWKB = (OperatorExportToWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
 		OperatorImportFromWkb importerWKB = (OperatorImportFromWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
 
@@ -712,51 +1032,51 @@ public class TestImportExport extends TestCase {
 		// Test Import Point from Point
 		ByteBuffer pointWKBBuffer = exporterWKB.execute(0, point, null);
 		int wkbType = pointWKBBuffer.getInt(1);
-		assertTrue(wkbType == WkbGeometryType.wkbPointZM);
+		assertEquals(wkbType, WkbGeometryType.wkbPointZM);
 		Point pointWKBGeometry = (Point) (importerWKB.execute(0, Geometry.Type.Point, pointWKBBuffer, null));
 
 		double x_1 = point.getX();
 		double x2 = pointWKBGeometry.getX();
-		assertTrue(x_1 == x2);
+		assertEquals(x_1, x2);
 
 		double y1 = point.getY();
 		double y2 = pointWKBGeometry.getY();
-		assertTrue(y1 == y2);
+		assertEquals(y1, y2);
 
 		double z_1 = point.getZ();
 		double z_2 = pointWKBGeometry.getZ();
-		assertTrue(z_1 == z_2);
+		assertEquals(z_1, z_2);
 
 		double m1 = point.getM();
 		double m2 = pointWKBGeometry.getM();
-		assertTrue(m1 == m2);
+		assertEquals(m1, m2);
 
 		// Test WKB_export_defaults on empty point
 		Point point2 = new Point();
 		pointWKBBuffer = exporterWKB.execute(0, point2, null);
 		pointWKBGeometry = (Point) (importerWKB.execute(0, Geometry.Type.Point, pointWKBBuffer, null));
-		assertTrue(pointWKBGeometry.isEmpty() == true);
+		assertTrue(pointWKBGeometry.isEmpty());
 		wkbType = pointWKBBuffer.getInt(1);
-		assertTrue(wkbType == WkbGeometryType.wkbPoint);
+		assertEquals(wkbType, WkbGeometryType.wkbPoint);
 
 		// Test WKB_export_point on empty point
 		pointWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportPoint, point2, null);
 		pointWKBGeometry = (Point) (importerWKB.execute(0, Geometry.Type.Point, pointWKBBuffer, null));
-		assertTrue(pointWKBGeometry.isEmpty() == true);
+		assertTrue(pointWKBGeometry.isEmpty());
 		wkbType = pointWKBBuffer.getInt(1);
-		assertTrue(wkbType == WkbGeometryType.wkbPoint);
+		assertEquals(wkbType, WkbGeometryType.wkbPoint);
 
 		// Test WKB_export_multi_point on empty point
 		MultiPoint multipoint = new MultiPoint();
 		ByteBuffer multipointWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportMultiPoint, multipoint, null);
 		MultiPoint multipointWKBGeometry = (MultiPoint) (importerWKB.execute(0, Geometry.Type.MultiPoint, multipointWKBBuffer, null));
-		assertTrue(multipointWKBGeometry.isEmpty() == true);
+		assertTrue(multipointWKBGeometry.isEmpty());
 		wkbType = multipointWKBBuffer.getInt(1);
-		assertTrue(wkbType == WkbGeometryType.wkbMultiPoint);
+		assertEquals(wkbType, WkbGeometryType.wkbMultiPoint);
 
 		// Test WKB_export_point on nonempty single point Multi_point
 		MultiPoint multipoint2 = makeMultiPoint2();
-		assertTrue(multipoint2.getPointCount() == 1);
+		assertEquals(1, multipoint2.getPointCount());
 		pointWKBBuffer = exporterWKB.execute(WkbExportFlags.wkbExportPoint, multipoint2, null);
 		pointWKBGeometry = (Point) (importerWKB.execute(0, Geometry.Type.Point, pointWKBBuffer, null));
 		Point3D point3d, mpoint3d;
@@ -764,11 +1084,165 @@ public class TestImportExport extends TestCase {
 		mpoint3d = multipoint2.getXYZ(0);
 		assertTrue(point3d.x == mpoint3d.x && point3d.y == mpoint3d.y && point3d.z == mpoint3d.z);
 		wkbType = pointWKBBuffer.getInt(1);
-		assertTrue(wkbType == WkbGeometryType.wkbPointZ);
+		assertEquals(wkbType, WkbGeometryType.wkbPointZ);
 	}
 
 	@Test
-	public static void testImportExportWKBEnvelope() {
+	public void testImportExportEWKBPoint() {
+		OperatorExportToEWkb exporterEWKB = (OperatorExportToEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
+		OperatorImportFromEWkb importerEWKB = (OperatorImportFromEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+
+		// Point
+		Point point = makePoint();
+
+		// Test Import Point from Point
+		ByteBuffer pointEWKBBuffer = exporterEWKB.execute(0, point, SpatialReference.create(4326), null);
+		int wkbType = pointEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbPointZMS);
+		MapGeometry pointEWKBMapGeometry = importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null);
+		assertEquals(4326, pointEWKBMapGeometry.getSpatialReference().getID());
+		Point pointEWKBGeometry = (Point) pointEWKBMapGeometry.getGeometry();
+
+		double x_1 = point.getX();
+		double x2 = pointEWKBGeometry.getX();
+		assertTrue(x_1 == x2);
+
+		double y1 = point.getY();
+		double y2 = pointEWKBGeometry.getY();
+		assertTrue(y1 == y2);
+
+		double z_1 = point.getZ();
+		double z_2 = pointEWKBGeometry.getZ();
+		assertTrue(z_1 == z_2);
+
+		double m1 = point.getM();
+		double m2 = pointEWKBGeometry.getM();
+		assertTrue(m1 == m2);
+
+		// Test EWKB_export_defaults on empty point
+		Point point2 = new Point();
+		pointEWKBBuffer = exporterEWKB.execute(0, point2, null, null);
+		pointEWKBGeometry = (Point) (importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null).getGeometry());
+		assertTrue(pointEWKBGeometry.isEmpty() == true);
+		wkbType = pointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbPoint);
+
+		// Test EWKB_export_point on empty point
+		pointEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportPoint, point2, null, null);
+		pointEWKBGeometry = (Point) (importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null).getGeometry());
+		assertTrue(pointEWKBGeometry.isEmpty() == true);
+		wkbType = pointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbPoint);
+
+		// Test EWKB_export_multi_point on empty point
+		MultiPoint multipoint = new MultiPoint();
+		ByteBuffer multipointEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportMultiPoint, multipoint, null, null);
+		MultiPoint multipointEWKBGeometry = (MultiPoint) (importerEWKB.execute(0, Geometry.Type.MultiPoint, multipointEWKBBuffer, null).getGeometry());
+		assertTrue(multipointEWKBGeometry.isEmpty() == true);
+		wkbType = multipointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbMultiPoint);
+
+		// Test EWKB_export_point on nonempty single point Multi_point
+		MultiPoint multipoint2 = makeMultiPoint2();
+		assertTrue(multipoint2.getPointCount() == 1);
+		pointEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportPoint, multipoint2, null, null);
+		pointEWKBGeometry = (Point) (importerEWKB.execute(0, Geometry.Type.Point, pointEWKBBuffer, null).getGeometry());
+		Point3D point3d, mpoint3d;
+		point3d = pointEWKBGeometry.getXYZ();
+		mpoint3d = multipoint2.getXYZ(0);
+		assertTrue(point3d.x == mpoint3d.x && point3d.y == mpoint3d.y && point3d.z == mpoint3d.z);
+		wkbType = pointEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.eWkbPointZ);
+	}
+
+	@Test
+	public void testImportExportEWKBEnvelope() {
+		OperatorExportToEWkb exporterEWKB = (OperatorExportToEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
+		OperatorImportFromEWkb importerEWKB = (OperatorImportFromEWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+
+		// Test Export Envelope to Polygon (WKB_export_defaults)
+		Envelope envelope = makeEnvelope();
+		envelope.dropAttribute(VertexDescription.Semantics.ID);
+
+		ByteBuffer polygonEWKBBuffer = exporterEWKB.execute(0, envelope, null,null);
+		int wkbType = polygonEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbPolygonZM);
+		Polygon polygon = (Polygon) (importerEWKB.execute(0, Geometry.Type.Polygon, polygonEWKBBuffer, null).getGeometry());
+		int point_count = polygon.getPointCount();
+		assertEquals(4, point_count);
+
+		Envelope2D env = new Envelope2D();
+		Envelope1D interval;
+
+		envelope.queryEnvelope2D(env);
+		interval = envelope.queryInterval(VertexDescription.Semantics.Z, 0);
+		Point3D point3d;
+		point3d = polygon.getXYZ(0);
+		assertTrue(point3d.x == env.xmin && point3d.y == env.ymin && point3d.z == interval.vmin);
+		point3d = polygon.getXYZ(1);
+		assertTrue(point3d.x == env.xmin && point3d.y == env.ymax && point3d.z == interval.vmax);
+		point3d = polygon.getXYZ(2);
+		assertTrue(point3d.x == env.xmax && point3d.y == env.ymax && point3d.z == interval.vmin);
+		point3d = polygon.getXYZ(3);
+		assertTrue(point3d.x == env.xmax && point3d.y == env.ymin && point3d.z == interval.vmax);
+
+		interval = envelope.queryInterval(VertexDescription.Semantics.M, 0);
+		double m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 0, 0);
+		assertEquals(m, interval.vmin);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 1, 0);
+		assertEquals(m, interval.vmax);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 2, 0);
+		assertEquals(m, interval.vmin);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 3, 0);
+		assertEquals(m, interval.vmax);
+
+		// Test EWKB_export_multi_polygon on nonempty Envelope
+		polygonEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportMultiPolygon, envelope, null, null);
+		wkbType = polygonEWKBBuffer.getInt(1);
+		assertEquals(wkbType, WkbGeometryType.eWkbMultiPolygonZM);
+		polygon = (Polygon) (importerEWKB.execute(0, Geometry.Type.Polygon, polygonEWKBBuffer, null).getGeometry());
+		point_count = polygon.getPointCount();
+		assertEquals(4, point_count);
+
+		envelope.queryEnvelope2D(env);
+		interval = envelope.queryInterval(VertexDescription.Semantics.Z, 0);
+		point3d = polygon.getXYZ(0);
+		assertTrue(point3d.x == env.xmin && point3d.y == env.ymin && point3d.z == interval.vmin);
+		point3d = polygon.getXYZ(1);
+		assertTrue(point3d.x == env.xmin && point3d.y == env.ymax && point3d.z == interval.vmax);
+		point3d = polygon.getXYZ(2);
+		assertTrue(point3d.x == env.xmax && point3d.y == env.ymax && point3d.z == interval.vmin);
+		point3d = polygon.getXYZ(3);
+		assertTrue(point3d.x == env.xmax && point3d.y == env.ymin && point3d.z == interval.vmax);
+
+		interval = envelope.queryInterval(VertexDescription.Semantics.M, 0);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 0, 0);
+		assertTrue(m == interval.vmin);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 1, 0);
+		assertTrue(m == interval.vmax);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 2, 0);
+		assertTrue(m == interval.vmin);
+		m = polygon.getAttributeAsDbl(VertexDescription.Semantics.M, 3, 0);
+		assertTrue(m == interval.vmax);
+
+		// Test EWKB_export_defaults on empty Envelope
+		Envelope envelope2 = new Envelope();
+		polygonEWKBBuffer = exporterEWKB.execute(0, envelope2, null, null);
+		wkbType = polygonEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbPolygon);
+		polygon = (Polygon) (importerEWKB.execute(0, Geometry.Type.Polygon, polygonEWKBBuffer, null).getGeometry());
+		assertTrue(polygon.isEmpty());
+
+		// Test EWKB_export_polygon on empty Envelope
+		polygonEWKBBuffer = exporterEWKB.execute(WkbExportFlags.wkbExportPolygon, envelope2, null, null);
+		wkbType = polygonEWKBBuffer.getInt(1);
+		assertTrue(wkbType == WkbGeometryType.wkbPolygon);
+		polygon = (Polygon) (importerEWKB.execute(0, Geometry.Type.Polygon, polygonEWKBBuffer, null).getGeometry());
+		assertTrue(polygon.isEmpty());
+	}
+
+	@Test
+	public void testImportExportWKBEnvelope() {
 		OperatorExportToWkb exporterWKB = (OperatorExportToWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
 		OperatorImportFromWkb importerWKB = (OperatorImportFromWkb) OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
 
@@ -1859,11 +2333,11 @@ public class TestImportExport extends TestCase {
 
 		for (String shapely : shapelyHex) {
 			byte[] ewkb =  hexStringToByteArray(shapely);
-			OperatorImportFromWkb operatorImportFromWkb = (OperatorImportFromWkb)OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromWkb);
-			OperatorExportToWkb operatorExportToWkb = (OperatorExportToWkb)OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToWkb);
+			OperatorImportFromEWkb operatorImportFromEWkb = (OperatorImportFromEWkb)OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ImportFromEWkb);
+			OperatorExportToEWkb operatorExportToWkb = (OperatorExportToEWkb)OperatorFactoryLocal.getInstance().getOperator(Operator.Type.ExportToEWkb);
 			ByteBuffer byteBuffer = ByteBuffer.wrap(ewkb);
-			Geometry geometry = operatorImportFromWkb.execute(0, Geometry.Type.Unknown, byteBuffer, null);
-			ByteBuffer result = operatorExportToWkb.execute(WkbExportFlags.wkbExportAsExtendedWkb, geometry, null);
+			MapGeometry mapGeometry = operatorImportFromEWkb.execute(0, Geometry.Type.Unknown, byteBuffer, null);
+			ByteBuffer result = operatorExportToWkb.execute(0, mapGeometry.getGeometry(), null, null);
 
 			ByteBuffer expected = ByteBuffer.wrap(ewkb);
 			// endianness
@@ -1878,6 +2352,20 @@ public class TestImportExport extends TestCase {
 			// size
 			assertEquals(expected.array().length, byteBuffer.array().length);
 		}
+	}
+
+	@Test
+	public void testZeroRingWkb() {
+		//https://github.com/Esri/geometry-api-java/issues/275
+		Polygon poly = new Polygon();
+		poly.startPath(0, 0);
+		poly.lineTo(0, 10);
+		poly.lineTo(0, 10);
+		poly.addEnvelope(new Envelope(1, 1, 3, 3), false);
+
+		ByteBuffer bb = OperatorExportToWkb.local().execute(0, poly, null);
+		Geometry res = OperatorImportFromWkb.local().execute(0, Geometry.Type.Unknown, bb, null);
+		assertTrue(res.equals(poly));
 	}
 
 	public static Polygon makePolygon() {
